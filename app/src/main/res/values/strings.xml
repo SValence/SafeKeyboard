@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">SafeKeyboard</string>
+    <string name="description">SafeKeyboard</string>
+    <string name="safe_keyboard">智能加密安全软键盘</string>
+    <string name="keyboard_key1">"&#64;"</string>
+    <string name="keyboard_key2">"&#38;"</string>
+    <string name="keyboard_key3">\"</string>
+    <string name="keyboard_key4">"&#60;"</string>
+    <string name="keyboard_key5">"&#62;"</string>
+    <string name="keyboard_system">"系统键盘"</string>
+    <string name="keyboard_demo_new">"安全软键盘"</string>
+    <string name="mLabelTextSize">mLabelTextSize</string>
+</resources>

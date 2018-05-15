@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <layer-list>
+            <item>
+                <shape>
+                    <solid android:color="@color/keyboardPress" />
+                    <corners android:radius="5dp" />
+                </shape>
+            </item>
+            <item
+                android:bottom="16dp"
+                android:drawable="@drawable/icon_capital_selected"
+                android:left="13dp"
+                android:right="13dp"
+                android:top="16dp" />
+        </layer-list>
+    </item>
+    <item>
+        <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+            <item>
+                <shape>
+                    <solid android:color="@color/keyboardNormal" />
+                    <corners android:radius="5dp" />
+                </shape>
+            </item>
+            <item
+                android:bottom="16dp"
+                android:drawable="@drawable/icon_capital_selected"
+                android:left="13dp"
+                android:right="13dp"
+                android:top="16dp" />
+        </layer-list>
+    </item>
+</selector>

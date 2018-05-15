@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/normalEditText"
+            android:layout_width="match_parent"
+            android:layout_height="50sp"
+            android:layout_marginEnd="10sp"
+            android:layout_marginStart="10sp"
+            android:hint="@string/keyboard_system"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/safeEditText"
+            android:layout_width="match_parent"
+            android:layout_height="50sp"
+            android:layout_marginEnd="10sp"
+            android:layout_marginStart="10sp"
+            android:hint="@string/keyboard_demo_new"
+            android:inputType="textVisiblePassword" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/keyboardViewPlace"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical" />
+
+</RelativeLayout>

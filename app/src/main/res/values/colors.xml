@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="deepDark">#222222</color>
+    <color name="transparent">#00000000</color>
+    <color name="keyboardBackColor">#212121</color>
+    <color name="keyboardKeyBack">#474749</color>
+    <color name="darkGray">#A9A9A9</color>
+    <color name="lightGray">#D3D3D3</color>
+    <color name="keyboardNormal">#1c69ac</color>
+    <color name="keyboardDeep">#991c69ac</color>
+    <color name="keyboardPress">#1296db</color>
+    <color name="colorRed">#FF0000</color>
+</resources>
