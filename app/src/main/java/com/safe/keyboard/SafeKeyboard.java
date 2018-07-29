@@ -2,6 +2,7 @@ package com.safe.keyboard;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
 import android.os.Build;
@@ -51,24 +52,43 @@ public class SafeKeyboard {
     private Handler showHandler = new Handler(Looper.getMainLooper());
     private Handler hEndHandler = new Handler(Looper.getMainLooper());
     private Handler sEndHandler = new Handler(Looper.getMainLooper());
+    private Drawable delDrawable;
+    private Drawable lowDrawable;
+    private Drawable upDrawable;
+    private int keyboardContainerResId;
+    private int keyboardResId;
 
     private TranslateAnimation showAnimation;
     private TranslateAnimation hideAnimation;
     private long lastTouchTime;
     private EditText mEditText;
 
-    SafeKeyboard(Context mContext, LinearLayout layout, EditText mEditText) {
+    SafeKeyboard(Context mContext, LinearLayout layout, EditText mEditText, int id, int keyId) {
         this.mContext = mContext;
         this.layout = layout;
         this.mEditText = mEditText;
+        this.keyboardContainerResId = id;
+        this.keyboardResId = keyId;
 
         initKeyboard();
         initAnimation();
         addListeners();
     }
 
-    public static boolean isCapes() {
-        return isCapes;
+    SafeKeyboard(Context mContext, LinearLayout layout, EditText mEditText, int id, int keyId,
+                 Drawable del, Drawable low, Drawable up) {
+        this.mContext = mContext;
+        this.layout = layout;
+        this.mEditText = mEditText;
+        this.keyboardContainerResId = id;
+        this.keyboardResId = keyId;
+        this.delDrawable = del;
+        this.lowDrawable = low;
+        this.upDrawable = up;
+
+        initKeyboard();
+        initAnimation();
+        addListeners();
     }
 
     private void initAnimation() {
@@ -131,13 +151,16 @@ public class SafeKeyboard {
 
     @SuppressLint("ClickableViewAccessibility")
     private void initKeyboard() {
-        keyContainer = LayoutInflater.from(mContext).inflate(R.layout.layout_keyboard_containor, layout, true);
+        keyContainer = LayoutInflater.from(mContext).inflate(keyboardContainerResId, layout, true);
         keyContainer.setVisibility(View.GONE);
         keyboardNumber = new Keyboard(mContext, R.xml.keyboard_num);            //实例化数字键盘
         keyboardLetter = new Keyboard(mContext, R.xml.keyboard_letter);         //实例化字母键盘
         keyboardSymbol = new Keyboard(mContext, R.xml.keyboard_symbol);         //实例化符号键盘
         // 由于符号键盘与字母键盘共用一个KeyBoardView, 所以不需要再为符号键盘单独实例化一个KeyBoardView
-        keyboardView = keyContainer.findViewById(R.id.safeKeyboardLetter);
+        keyboardView = keyContainer.findViewById(keyboardResId);
+        keyboardView.setDelDrawable(delDrawable);
+        keyboardView.setLowDrawable(lowDrawable);
+        keyboardView.setUpDrawable(upDrawable);
         keyboardView.setKeyboard(keyboardLetter);                         //给键盘View设置键盘
         keyboardView.setEnabled(true);
         keyboardView.setPreviewEnabled(false);
@@ -170,15 +193,8 @@ public class SafeKeyboard {
                 keyboardView.setPreviewEnabled(false);
             } else {
                 keyboardView.setPreviewEnabled(true);
-                if (primaryCode == -1) {
-                    keyboardView.setPreviewEnabled(false);
-                } else if (primaryCode == -5) {
-                    keyboardView.setPreviewEnabled(false);
-                } else if (primaryCode == 32) {
-                    keyboardView.setPreviewEnabled(false);
-                } else if (primaryCode == -2) {
-                    keyboardView.setPreviewEnabled(false);
-                } else if (primaryCode == 100860) {
+                if (primaryCode == -1 || primaryCode == -5 || primaryCode == 32 || primaryCode == -2
+                        || primaryCode == 100860 || primaryCode == -35) {
                     keyboardView.setPreviewEnabled(false);
                 } else {
                     keyboardView.setPreviewEnabled(true);
@@ -299,6 +315,7 @@ public class SafeKeyboard {
             }
         }
         isCapes = !isCapes;
+        keyboardView.setCap(isCapes);
     }
 
     public void hideKeyboard() {
@@ -451,5 +468,20 @@ public class SafeKeyboard {
         }
         lastTouchTime = thisTouchTime;
         return false;
+    }
+
+    public void setDelDrawable(Drawable delDrawable) {
+        this.delDrawable = delDrawable;
+        keyboardView.setDelDrawable(delDrawable);
+    }
+
+    public void setLowDrawable(Drawable lowDrawable) {
+        this.lowDrawable = lowDrawable;
+        keyboardView.setLowDrawable(lowDrawable);
+    }
+
+    public void setUpDrawable(Drawable upDrawable) {
+        this.upDrawable = upDrawable;
+        keyboardView.setUpDrawable(upDrawable);
     }
 }
