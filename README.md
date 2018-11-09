@@ -1,6 +1,9 @@
 # **SafeKeyboard**
 Android自定义安全软键盘，完全自定义，方便、安全、可靠
 
+预览
+![image](https://img-blog.csdn.net/20180516102718149)
+
 ## **历史更新**
 ### 一、 2018/07/29
 * 1 . `AndroidMenifest.xml` 文件中添加 `"android:windowSoftInputMode="stateAlwaysHidden">"`, 兼容低版本系统, 重新进入软件界面系统软键盘自动弹出的问题。
