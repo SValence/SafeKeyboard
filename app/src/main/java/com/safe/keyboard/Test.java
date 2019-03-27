@@ -11,6 +11,7 @@ public class Test {
     private int f;
     private int g;
     private int w;//master提交的
+    private int g;
     private int g
     private int w;//master提交的
     private int g
