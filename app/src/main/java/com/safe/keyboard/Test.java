@@ -7,4 +7,6 @@ public class Test {
     private int d;
     private int e;
     private int f;
+    private int g;
+    private int g
 }
