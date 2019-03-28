@@ -8,4 +8,5 @@ public class Test {
     private int e;
     private int f;
     private int g;
+    private int w;//master提交的
 }
