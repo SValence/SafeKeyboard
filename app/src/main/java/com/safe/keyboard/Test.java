@@ -30,4 +30,6 @@ public class Test {
     private int nnnnn;//我是B
     private int nnnnnn;//我是B
     private int nnnnnn1;//我是B
+    private int mmm//我是A
+    private int ooo;//来自合并
 }
