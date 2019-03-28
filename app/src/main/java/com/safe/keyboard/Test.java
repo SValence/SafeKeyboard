@@ -13,4 +13,5 @@ public class Test {
     private int g
     //28天
     private int i;
+    private int j;
 }
