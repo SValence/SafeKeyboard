@@ -21,4 +21,5 @@ public class Test {
     private int nnnn;//我是B
     private int nnnnn;//我是B
     private int nnnnnn;//我是B
+    private int nnnnnn1;//我是B
 }
