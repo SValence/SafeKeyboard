@@ -12,6 +12,8 @@ public class Test {
     private int g;
     private int w;//master提交的
     private int g;
+    //28天
+    private int i;
     private int g
     private int w;//master提交的
     private int g
