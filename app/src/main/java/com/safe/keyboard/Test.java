@@ -16,4 +16,5 @@ public class Test {
     private int j;
     private int k;
     private int n;//我是B
+    private int nn;//我是B
 }
