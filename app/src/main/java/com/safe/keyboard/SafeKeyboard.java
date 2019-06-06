@@ -41,6 +41,7 @@ public class SafeKeyboard {
     private Keyboard keyboardNumber;        //数字键盘
     private Keyboard keyboardLetter;        //字母键盘
     private Keyboard keyboardSymbol;        //符号键盘
+    private Keyboard keyboardIdCard;        //中国身份证号码键盘
     private static boolean isCapes = false;
     private boolean isShowStart = false;
     private boolean isHideStart = false;
@@ -156,6 +157,7 @@ public class SafeKeyboard {
         keyboardNumber = new Keyboard(mContext, R.xml.keyboard_num);            //实例化数字键盘
         keyboardLetter = new Keyboard(mContext, R.xml.keyboard_letter);         //实例化字母键盘
         keyboardSymbol = new Keyboard(mContext, R.xml.keyboard_symbol);         //实例化符号键盘
+        keyboardIdCard = new Keyboard(mContext, R.xml.keyboard_id_card_zn);            //实例化数字键盘
         // 由于符号键盘与字母键盘共用一个KeyBoardView, 所以不需要再为符号键盘单独实例化一个KeyBoardView
         keyboardView = keyContainer.findViewById(keyboardResId);
         keyboardView.setDelDrawable(delDrawable);

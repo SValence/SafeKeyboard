@@ -138,16 +138,24 @@
         <Key
             android:codes="-2"
             android:keyLabel="123"
-            android:keyWidth="19%p" />
+            android:keyWidth="18%p" />
+        <Key
+            android:codes="44"
+            android:keyWidth="12%p"
+            android:keyLabel="," />
         <Key
             android:codes="32"
             android:isRepeatable="false"
-            android:keyLabel="space"
-            android:keyWidth="58%p" />
+            android:keyWidth="36%p"
+            android:keyLabel="space" />
+        <Key
+            android:codes="46"
+            android:keyWidth="12%p"
+            android:keyLabel="." />
         <Key
             android:codes="100860"
             android:keyEdgeFlags="right"
             android:keyLabel="#+="
-            android:keyWidth="19%p" />
+            android:keyWidth="18%p" />
     </Row>
 </Keyboard>
