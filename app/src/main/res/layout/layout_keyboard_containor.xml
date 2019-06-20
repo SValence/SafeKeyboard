@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -61,8 +62,8 @@
         android:id="@+id/keyboardLayer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10sp"
-        android:layout_marginTop="2sp">
+        android:layout_marginTop="2sp"
+        android:layout_marginBottom="10sp">
 
         <com.safe.keyboard.SafeKeyboardView
             android:id="@+id/safeKeyboardLetter"
@@ -76,7 +77,9 @@
             android:keyPreviewHeight="60dp"
             android:keyPreviewLayout="@layout/keyboard_preview_layout"
             android:keyPreviewOffset="0dp"
-            android:keyTextColor="@color/white" />
+            android:keyTextColor="@color/white"
+            app:only_id_card="false"
+            app:random_digit="false" />
 
     </FrameLayout>
 </LinearLayout>

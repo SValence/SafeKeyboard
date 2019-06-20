@@ -11,6 +11,7 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.text.Editable;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,6 +24,7 @@ import android.widget.LinearLayout;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -63,6 +65,12 @@ public class SafeKeyboard {
     private TranslateAnimation hideAnimation;
     private long lastTouchTime;
     private EditText mEditText;
+    private SparseArray<Keyboard.Key> randomDigitKeys;
+    private SparseArray<Keyboard.Key> randomIdCardDigitKeys;
+
+    private int mCurrentInputType;
+
+    // TODO... 即将支持多 EditText 共用一个 SafeKeyboard
 
     SafeKeyboard(Context mContext, LinearLayout layout, EditText mEditText, int id, int keyId) {
         this.mContext = mContext;
@@ -154,12 +162,24 @@ public class SafeKeyboard {
     private void initKeyboard() {
         keyContainer = LayoutInflater.from(mContext).inflate(keyboardContainerResId, layout, true);
         keyContainer.setVisibility(View.GONE);
-        keyboardNumber = new Keyboard(mContext, R.xml.keyboard_num);            //实例化数字键盘
+        keyboardNumber = new Keyboard(mContext, R.xml.keyboard_num_symbol);     //实例化数字键盘
+        // 注: 这里有两个数字键盘,  keyboard_num_symbol:带部分符号;   keyboard_num:纯数字键盘
+
         keyboardLetter = new Keyboard(mContext, R.xml.keyboard_letter);         //实例化字母键盘
         keyboardSymbol = new Keyboard(mContext, R.xml.keyboard_symbol);         //实例化符号键盘
-        keyboardIdCard = new Keyboard(mContext, R.xml.keyboard_id_card_zn);            //实例化数字键盘
+        keyboardIdCard = new Keyboard(mContext, R.xml.keyboard_id_card_zn);     //实例化 IdCard(中国身份证) 键盘
         // 由于符号键盘与字母键盘共用一个KeyBoardView, 所以不需要再为符号键盘单独实例化一个KeyBoardView
+
+        initRandomDigitKeys();
+        initIdCardRandomDigitKeys();
+
         keyboardView = keyContainer.findViewById(keyboardResId);
+        if (delDrawable == null)
+            delDrawable = mContext.getDrawable(R.drawable.icon_del);
+        if (lowDrawable == null)
+            lowDrawable = mContext.getDrawable(R.drawable.icon_capital_default);
+        if (upDrawable == null)
+            upDrawable = mContext.getDrawable(R.drawable.icon_capital_selected);
         keyboardView.setDelDrawable(delDrawable);
         keyboardView.setLowDrawable(lowDrawable);
         keyboardView.setUpDrawable(upDrawable);
@@ -169,21 +189,33 @@ public class SafeKeyboard {
         keyboardView.setOnKeyboardActionListener(listener);
 
         FrameLayout done = keyContainer.findViewById(R.id.keyboardDone);
-        done.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isKeyboardShown()) {
-                    hideKeyboard();
-                }
+        done.setOnClickListener(v -> {
+            if (isKeyboardShown()) {
+                hideKeyboard();
             }
         });
 
-        keyboardView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return event.getAction() == MotionEvent.ACTION_MOVE;
-            }
-        });
+        keyboardView.setOnTouchListener((v, event) -> event.getAction() == MotionEvent.ACTION_MOVE);
+    }
+
+    private void initRandomDigitKeys() {
+        randomDigitKeys = new SparseArray<>();
+        List<Keyboard.Key> keys = keyboardNumber.getKeys();
+        for (Keyboard.Key key : keys) {
+            int code = key.codes[0];
+            if (code >= 48 && code <= 57)
+                randomDigitKeys.put(code, key);
+        }
+    }
+
+    private void initIdCardRandomDigitKeys() {
+        randomIdCardDigitKeys = new SparseArray<>();
+        List<Keyboard.Key> keys = keyboardIdCard.getKeys();
+        for (Keyboard.Key key : keys) {
+            int code = key.codes[0];
+            if (code >= 48 && code <= 57)
+                randomIdCardDigitKeys.put(code, key);
+        }
     }
 
     // 设置键盘点击监听
@@ -281,6 +313,30 @@ public class SafeKeyboard {
         }
     };
 
+    private void refreshDigitKeyboard(Keyboard keyboard) {
+        if (keyboard != null) {
+            SparseArray<Keyboard.Key> randomKeys;
+            if (keyboard == keyboardIdCard) {
+                // 如果是 IdCard 键盘
+                randomKeys = randomIdCardDigitKeys;
+            } else {
+                // 否则认为是 数字 键盘
+                randomKeys = randomDigitKeys;
+            }
+            HashSet<Integer> set = new HashSet<>();
+            while (set.size() < 10) {
+                int num = (int) (Math.random() * 10);
+                if (set.add(num)) {
+                    // set.size() - 1 表示目前是第几个数字按键
+                    Keyboard.Key key = randomKeys.get(set.size() - 1 + 48);
+                    key.label = num + "";
+                    key.codes[0] = 48 + num;
+                }
+            }
+        } else {
+            Log.w(TAG, "Refresh Digit ERROR! Keyboard is null");
+        }
+    }
 
     private void switchKeyboard() {
         switch (keyboardType) {
@@ -291,6 +347,9 @@ public class SafeKeyboard {
                 keyboardView.setKeyboard(keyboardSymbol);
                 break;
             case 3:
+                if (keyboardView.isRandomDigit()) {
+                    refreshDigitKeyboard(keyboardNumber);
+                }
                 keyboardView.setKeyboard(keyboardNumber);
                 break;
             default:
@@ -328,37 +387,35 @@ public class SafeKeyboard {
     /**
      * 只起到延时开始显示的作用
      */
-    private final Runnable showRun = new Runnable() {
-        @Override
-        public void run() {
-            showKeyboard();
+    private final Runnable showRun = this::showKeyboard;
+
+    private final Runnable hideEnd = () -> {
+        isHideStart = false;
+        if (keyContainer.getVisibility() != View.GONE) {
+            keyContainer.setVisibility(View.GONE);
         }
     };
 
-    private final Runnable hideEnd = new Runnable() {
-        @Override
-        public void run() {
-            isHideStart = false;
-            if (keyContainer.getVisibility() != View.GONE) {
-                keyContainer.setVisibility(View.GONE);
-            }
-        }
-    };
-
-    private final Runnable showEnd = new Runnable() {
-        @Override
-        public void run() {
-            isShowStart = false;
-            // 在迅速点击不同输入框时, 造成自定义软键盘和系统软件盘不停的切换, 偶尔会出现停在使用系统键盘的输入框时, 没有隐藏
-            // 自定义软键盘的情况, 为了杜绝这个现象, 加上下面这段代码
-            if (!mEditText.isFocused()) {
-                hideKeyboard();
-            }
+    private final Runnable showEnd = () -> {
+        isShowStart = false;
+        // 在迅速点击不同输入框时, 造成自定义软键盘和系统软件盘不停的切换, 偶尔会出现停在使用系统键盘的输入框时, 没有隐藏
+        // 自定义软键盘的情况, 为了杜绝这个现象, 加上下面这段代码
+        if (!mEditText.isFocused()) {
+            hideKeyboard();
         }
     };
 
     private void showKeyboard() {
-        keyboardView.setKeyboard(keyboardLetter);
+        // TODO... 根据 mCurrentInputType 的值, 自动选择显示的键盘
+
+        Keyboard lastKeyboard = keyboardView.getLastKeyboard();
+        if (keyboardView.isOnlyIdCard()) {
+            lastKeyboard = keyboardIdCard;
+        }
+        if (lastKeyboard != null && (lastKeyboard == keyboardNumber || lastKeyboard == keyboardIdCard) && keyboardView.isRandomDigit()) {
+            refreshDigitKeyboard(lastKeyboard);
+        }
+        keyboardView.setKeyboard(lastKeyboard == null ? keyboardLetter : lastKeyboard);
         keyContainer.setVisibility(View.VISIBLE);
         keyContainer.clearAnimation();
         keyContainer.startAnimation(showAnimation);
@@ -376,43 +433,40 @@ public class SafeKeyboard {
 
     @SuppressLint("ClickableViewAccessibility")
     private void addListeners() {
-        mEditText.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    hideSystemKeyBoard((EditText) v);
-                    if (!isKeyboardShown() && !isShowStart) {
-                        showHandler.removeCallbacks(showRun);
-                        showHandler.postDelayed(showRun, SHOW_DELAY);
-                    }
+        mEditText.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                hideSystemKeyBoard((EditText) v);
+                if (!isKeyboardShown() && !isShowStart) {
+                    showHandler.removeCallbacks(showRun);
+                    mCurrentInputType = mEditText.getInputType();
+                    showHandler.postDelayed(showRun, SHOW_DELAY);
                 }
-                return false;
             }
+            return false;
         });
-        mEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                boolean result = isValidTouch();
-                if (v instanceof EditText) {
-                    if (!hasFocus) {
-                        if (result) {
-                            if (isKeyboardShown() && !isHideStart) {
-                                hideKeyboard();
-                            }
-                        } else {
+        mEditText.setOnFocusChangeListener((v, hasFocus) -> {
+            boolean result = isValidTouch();
+            if (v instanceof EditText) {
+                if (!hasFocus) {
+                    if (result) {
+                        if (isKeyboardShown() && !isHideStart) {
                             hideKeyboard();
                         }
                     } else {
-                        hideSystemKeyBoard((EditText) v);
-                        if (result) {
-                            if (!isKeyboardShown() && !isShowStart) {
-                                showHandler.removeCallbacks(showRun);
-                                showHandler.postDelayed(showRun, SHOW_DELAY);
-                            }
-                        } else {
+                        hideKeyboard();
+                    }
+                } else {
+                    hideSystemKeyBoard((EditText) v);
+                    if (result) {
+                        if (!isKeyboardShown() && !isShowStart) {
                             showHandler.removeCallbacks(showRun);
-                            showHandler.postDelayed(showRun, SHOW_DELAY + DELAY_TIME);
+                            mCurrentInputType = mEditText.getInputType();
+                            showHandler.postDelayed(showRun, SHOW_DELAY);
                         }
+                    } else {
+                        showHandler.removeCallbacks(showRun);
+                        mCurrentInputType = mEditText.getInputType();
+                        showHandler.postDelayed(showRun, SHOW_DELAY + DELAY_TIME);
                     }
                 }
             }

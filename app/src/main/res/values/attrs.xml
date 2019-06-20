@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SafeKeyboardView">
+        <attr name="random_digit" format="boolean" />
+        <attr name="only_id_card" format="boolean" />
+    </declare-styleable>
+</resources>

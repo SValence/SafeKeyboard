@@ -23,9 +23,9 @@ public class MainActivity extends AppCompatActivity {
         @SuppressLint("InflateParams") View view = LayoutInflater.from(this).inflate(R.layout.layout_keyboard_containor, null);
         safeKeyboard = new SafeKeyboard(getApplicationContext(), keyboardContainer, safeEdit,
                 R.layout.layout_keyboard_containor, view.findViewById(R.id.safeKeyboardLetter).getId());
-        safeKeyboard.setDelDrawable(this.getResources().getDrawable(R.drawable.icon_del));
-        safeKeyboard.setLowDrawable(this.getResources().getDrawable(R.drawable.icon_capital_default));
-        safeKeyboard.setUpDrawable(this.getResources().getDrawable(R.drawable.icon_capital_selected));
+//        safeKeyboard.setDelDrawable(this.getResources().getDrawable(R.drawable.icon_del));
+//        safeKeyboard.setLowDrawable(this.getResources().getDrawable(R.drawable.icon_capital_default));
+//        safeKeyboard.setUpDrawable(this.getResources().getDrawable(R.drawable.icon_capital_selected));
     }
 
     // 当点击返回键时, 如果软键盘正在显示, 则隐藏软键盘并是此次返回无效

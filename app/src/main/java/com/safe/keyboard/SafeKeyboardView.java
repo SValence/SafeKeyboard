@@ -1,6 +1,7 @@
 package com.safe.keyboard;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -28,28 +29,68 @@ public class SafeKeyboardView extends KeyboardView {
     private Drawable delDrawable;
     private Drawable lowDrawable;
     private Drawable upDrawable;
+    private Keyboard lastKeyboard;
     /**
      * 按键的宽高至少是图标宽高的倍数
      */
     private static final int ICON2KEY = 2;
 
+    // 键盘的一些自定义属性
+    private boolean randomDigit;    // 数字随机
+    private final static boolean DIGIT_RANDOM = false;
+    private boolean onlyIdCard;     // 仅显示 身份证 键盘
+    private final static boolean ONLY_ID_CARD = false;
+
     public SafeKeyboardView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(context);
         this.mContext = context;
+
+        initAttrs(context, attrs, 0);
     }
 
     public SafeKeyboardView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(context);
         this.mContext = context;
+
+        initAttrs(context, attrs, defStyleAttr);
     }
 
-    private void init() {
+    private void initAttrs(Context context, AttributeSet attrs, int defStyleAttr) {
+        if (attrs != null) {
+            TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.SafeKeyboardView, defStyleAttr, 0);
+            randomDigit = array.getBoolean(R.styleable.SafeKeyboardView_random_digit, DIGIT_RANDOM);
+            onlyIdCard = array.getBoolean(R.styleable.SafeKeyboardView_only_id_card, ONLY_ID_CARD);
+            array.recycle();
+        }
+    }
+
+    private void init(Context context) {
         this.isCap = false;
-        this.delDrawable = null;
-        this.lowDrawable = null;
-        this.upDrawable = null;
+        // 默认三种图标
+        this.delDrawable = context.getDrawable(R.drawable.icon_del);
+        this.lowDrawable = context.getDrawable(R.drawable.icon_capital_default);
+        this.upDrawable = context.getDrawable(R.drawable.icon_capital_selected);
+        this.lastKeyboard = null;
+    }
+
+    public boolean isRandomDigit() {
+        return randomDigit;
+    }
+
+    public boolean isOnlyIdCard() {
+        return onlyIdCard;
+    }
+
+    @Override
+    public void setKeyboard(Keyboard keyboard) {
+        super.setKeyboard(keyboard);
+        this.lastKeyboard = keyboard;
+    }
+
+    public Keyboard getLastKeyboard() {
+        return lastKeyboard;
     }
 
     @Override
@@ -67,19 +108,20 @@ public class SafeKeyboardView extends KeyboardView {
     }
 
     private void drawSpecialKey(Canvas canvas, Keyboard.Key key) {
+        int color = Color.WHITE;
         if (key.codes[0] == -5) {
             drawKeyBackground(R.drawable.keyboard_change, canvas, key);
-            drawTextAndIcon(canvas, key, delDrawable);
+            drawTextAndIcon(canvas, key, delDrawable, color);
         } else if (key.codes[0] == -2 || key.codes[0] == 100860) {
             drawKeyBackground(R.drawable.keyboard_change, canvas, key);
-            drawTextAndIcon(canvas, key, null);
+            drawTextAndIcon(canvas, key, null, color);
         } else if (key.codes[0] == -1) {
             if (isCap) {
                 drawKeyBackground(R.drawable.keyboard_change, canvas, key);
-                drawTextAndIcon(canvas, key, upDrawable);
+                drawTextAndIcon(canvas, key, upDrawable, color);
             } else {
                 drawKeyBackground(R.drawable.keyboard_change, canvas, key);
-                drawTextAndIcon(canvas, key, lowDrawable);
+                drawTextAndIcon(canvas, key, lowDrawable, color);
             }
         }
     }
@@ -94,13 +136,13 @@ public class SafeKeyboardView extends KeyboardView {
         drawable.draw(canvas);
     }
 
-    private void drawTextAndIcon(Canvas canvas, Keyboard.Key key, @Nullable Drawable drawable) {
+    private void drawTextAndIcon(Canvas canvas, Keyboard.Key key, @Nullable Drawable drawable, int color) {
         try {
             Rect bounds = new Rect();
             Paint paint = new Paint();
             paint.setTextAlign(Paint.Align.CENTER);
             paint.setAntiAlias(true);
-            paint.setColor(Color.WHITE);
+            paint.setColor(color);
 
             if (key.label != null) {
                 String label = key.label.toString();
@@ -127,13 +169,13 @@ public class SafeKeyboardView extends KeyboardView {
                     } catch (NoSuchFieldException | IllegalAccessException e) {
                         e.printStackTrace();
                     }
-                    paint.setTextSize(keyTextSize);
+                    paint.setTextSize(keyTextSize + 10);
                     paint.setTypeface(Typeface.DEFAULT);
                 }
 
                 paint.getTextBounds(key.label.toString(), 0, key.label.toString().length(), bounds);
-                canvas.drawText(key.label.toString(), key.x + (key.width / 2),
-                        (key.y + key.height / 2) + bounds.height() / 2, paint);
+                canvas.drawText(key.label.toString(), key.x + (1.0f * key.width / 2),
+                        (key.y + 1.0f * key.height / 2) + 1.0f * bounds.height() / 2, paint);
             }
             if (drawable == null) return;
             // 约定: 最终图标的宽度和高度都需要在按键的宽度和高度的二分之一以内
