@@ -757,7 +757,7 @@ public class SafeKeyboard {
         mContext = null;
         isCapes = false;
         onEditTextTouchListener = null;
-        if (treeObserver != null && onGlobalFocusChangeListener != null) {
+        if (treeObserver != null && onGlobalFocusChangeListener != null && treeObserver.isAlive()) {
             treeObserver.removeOnGlobalFocusChangeListener(onGlobalFocusChangeListener);
         }
         treeObserver = null;
