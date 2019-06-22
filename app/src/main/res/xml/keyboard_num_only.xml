@@ -43,8 +43,8 @@
 
     <Row>
         <Key
-            android:codes="88"
-            android:keyLabel="X" />
+            android:codes="100861"
+            android:keyLabel="SValence" />
         <Key
             android:codes="48"
             android:keyLabel="0" />

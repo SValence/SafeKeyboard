@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -12,8 +13,8 @@
             android:id="@+id/normalEditText"
             android:layout_width="match_parent"
             android:layout_height="50sp"
-            android:layout_marginEnd="10sp"
             android:layout_marginStart="10sp"
+            android:layout_marginEnd="10sp"
             android:hint="@string/keyboard_system"
             android:inputType="text" />
 
@@ -21,10 +22,27 @@
             android:id="@+id/safeEditText"
             android:layout_width="match_parent"
             android:layout_height="50sp"
-            android:layout_marginEnd="10sp"
             android:layout_marginStart="10sp"
+            android:layout_marginEnd="10sp"
             android:hint="@string/keyboard_demo_new"
             android:inputType="textVisiblePassword" />
+
+        <EditText
+            android:id="@+id/safeEditText2"
+            android:layout_width="match_parent"
+            android:layout_height="50sp"
+            android:layout_marginStart="10sp"
+            android:layout_marginEnd="10sp"
+            android:hint="@string/keyboard_demo_new2"
+            android:inputType="number" />
+
+        <EditText
+            android:id="@+id/safeEditText3"
+            android:layout_width="match_parent"
+            android:layout_height="50sp"
+            android:layout_marginStart="10sp"
+            android:layout_marginEnd="10sp"
+            android:hint="@string/keyboard_demo_new3" />
 
     </LinearLayout>
 

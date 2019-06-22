@@ -26,9 +26,11 @@ public class SafeKeyboardView extends KeyboardView {
 
     private Context mContext;
     private boolean isCap;
+    private boolean isCapLock;
     private Drawable delDrawable;
     private Drawable lowDrawable;
     private Drawable upDrawable;
+    private Drawable upDrawableLock;
     private Keyboard lastKeyboard;
     /**
      * 按键的宽高至少是图标宽高的倍数
@@ -38,8 +40,10 @@ public class SafeKeyboardView extends KeyboardView {
     // 键盘的一些自定义属性
     private boolean randomDigit;    // 数字随机
     private final static boolean DIGIT_RANDOM = false;
-    private boolean onlyIdCard;     // 仅显示 身份证 键盘
-    private final static boolean ONLY_ID_CARD = false;
+    //    private boolean onlyIdCard;     // 仅显示 身份证 键盘
+//    private final static boolean ONLY_ID_CARD = false;
+    private boolean rememberLastType;     // 仅显示 身份证 键盘
+    private final static boolean REM_LAST_TYPE = true;
 
     public SafeKeyboardView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -61,17 +65,20 @@ public class SafeKeyboardView extends KeyboardView {
         if (attrs != null) {
             TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.SafeKeyboardView, defStyleAttr, 0);
             randomDigit = array.getBoolean(R.styleable.SafeKeyboardView_random_digit, DIGIT_RANDOM);
-            onlyIdCard = array.getBoolean(R.styleable.SafeKeyboardView_only_id_card, ONLY_ID_CARD);
+            // onlyIdCard = array.getBoolean(R.styleable.SafeKeyboardView_only_id_card, ONLY_ID_CARD);
+            rememberLastType = array.getBoolean(R.styleable.SafeKeyboardView_remember_last_type, REM_LAST_TYPE);
             array.recycle();
         }
     }
 
     private void init(Context context) {
         this.isCap = false;
+        this.isCapLock = false;
         // 默认三种图标
         this.delDrawable = context.getDrawable(R.drawable.icon_del);
         this.lowDrawable = context.getDrawable(R.drawable.icon_capital_default);
         this.upDrawable = context.getDrawable(R.drawable.icon_capital_selected);
+        this.upDrawableLock = context.getDrawable(R.drawable.icon_capital_selected_lock);
         this.lastKeyboard = null;
     }
 
@@ -79,8 +86,12 @@ public class SafeKeyboardView extends KeyboardView {
         return randomDigit;
     }
 
-    public boolean isOnlyIdCard() {
-        return onlyIdCard;
+//    public boolean isOnlyIdCard() {
+//        return onlyIdCard;
+//    }
+
+    public boolean isRememberLastType() {
+        return rememberLastType;
     }
 
     @Override
@@ -112,11 +123,14 @@ public class SafeKeyboardView extends KeyboardView {
         if (key.codes[0] == -5) {
             drawKeyBackground(R.drawable.keyboard_change, canvas, key);
             drawTextAndIcon(canvas, key, delDrawable, color);
-        } else if (key.codes[0] == -2 || key.codes[0] == 100860) {
+        } else if (key.codes[0] == -2 || key.codes[0] == 100860 || key.codes[0] == 100861) {
             drawKeyBackground(R.drawable.keyboard_change, canvas, key);
             drawTextAndIcon(canvas, key, null, color);
         } else if (key.codes[0] == -1) {
-            if (isCap) {
+            if (isCapLock) {
+                drawKeyBackground(R.drawable.keyboard_change, canvas, key);
+                drawTextAndIcon(canvas, key, upDrawableLock, color);
+            } else if (isCap) {
                 drawKeyBackground(R.drawable.keyboard_change, canvas, key);
                 drawTextAndIcon(canvas, key, upDrawable, color);
             } else {
@@ -225,6 +239,10 @@ public class SafeKeyboardView extends KeyboardView {
         isCap = cap;
     }
 
+    public void setCapLock(boolean isCapLock) {
+        this.isCapLock = isCapLock;
+    }
+
     public void setDelDrawable(Drawable delDrawable) {
         this.delDrawable = delDrawable;
     }
@@ -235,6 +253,10 @@ public class SafeKeyboardView extends KeyboardView {
 
     public void setUpDrawable(Drawable upDrawable) {
         this.upDrawable = upDrawable;
+    }
+
+    public void setUpDrawableLock(Drawable upDrawableLock) {
+        this.upDrawableLock = upDrawableLock;
     }
 
     public static int px2dip(Context context, float pxValue) {

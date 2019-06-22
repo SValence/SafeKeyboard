@@ -78,8 +78,8 @@
             android:keyPreviewLayout="@layout/keyboard_preview_layout"
             android:keyPreviewOffset="0dp"
             android:keyTextColor="@color/white"
-            app:only_id_card="false"
-            app:random_digit="false" />
+            app:random_digit="false"
+            app:remember_last_type="true" />
 
     </FrameLayout>
 </LinearLayout>

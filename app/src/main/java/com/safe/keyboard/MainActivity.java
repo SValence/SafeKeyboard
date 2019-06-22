@@ -19,10 +19,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         EditText safeEdit = findViewById(R.id.safeEditText);
+        EditText safeEdit2 = findViewById(R.id.safeEditText2);
+        EditText safeEdit3 = findViewById(R.id.safeEditText3);
+        View rootView = findViewById(R.id.main_root);
         LinearLayout keyboardContainer = findViewById(R.id.keyboardViewPlace);
         @SuppressLint("InflateParams") View view = LayoutInflater.from(this).inflate(R.layout.layout_keyboard_containor, null);
-        safeKeyboard = new SafeKeyboard(getApplicationContext(), keyboardContainer, safeEdit,
-                R.layout.layout_keyboard_containor, view.findViewById(R.id.safeKeyboardLetter).getId());
+        safeKeyboard = new SafeKeyboard(getApplicationContext(), keyboardContainer,
+                R.layout.layout_keyboard_containor, view.findViewById(R.id.safeKeyboardLetter).getId(), rootView);
+        safeKeyboard.putEditText(safeEdit.getId(), safeEdit);
+        safeKeyboard.putEditText(safeEdit2.getId(), safeEdit2);
+        safeKeyboard.putEditText(safeEdit3.getId(), safeEdit3);
+        safeKeyboard.putEditText2IdCardType(safeEdit3.getId(), safeEdit3);
 //        safeKeyboard.setDelDrawable(this.getResources().getDrawable(R.drawable.icon_del));
 //        safeKeyboard.setLowDrawable(this.getResources().getDrawable(R.drawable.icon_capital_default));
 //        safeKeyboard.setUpDrawable(this.getResources().getDrawable(R.drawable.icon_capital_selected));
@@ -39,5 +46,14 @@ public class MainActivity extends AppCompatActivity {
             return super.onKeyDown(keyCode, event);
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (safeKeyboard != null) {
+            safeKeyboard.release();
+            safeKeyboard = null;
+        }
+        super.onDestroy();
     }
 }
