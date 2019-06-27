@@ -71,6 +71,10 @@ public class SafeKeyboardView extends KeyboardView {
         }
     }
 
+    public void setRememberLastType(boolean remember) {
+        rememberLastType = remember;
+    }
+
     private void init(Context context) {
         this.isCap = false;
         this.isCapLock = false;

@@ -31,9 +31,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Administrator on 2018/3/7 0007.
@@ -87,7 +85,7 @@ public class SafeKeyboard {
     private ViewTreeObserver.OnGlobalFocusChangeListener onGlobalFocusChangeListener;
     private ViewTreeObserver treeObserver;
 
-    // TODO... 即将支持多 EditText 共用一个 SafeKeyboard
+    // 已支持多 EditText 共用一个 SafeKeyboard
 
     SafeKeyboard(Context mContext, LinearLayout layout, int id, int keyId, @NonNull View rootView) {
         this.mContext = mContext;
@@ -116,6 +114,10 @@ public class SafeKeyboard {
         initData();
         initKeyboard();
         initAnimation();
+    }
+
+    public void enableRememberLastKeyboardType(boolean enable) {
+        keyboardView.setRememberLastType(enable);
     }
 
     private void initData() {
@@ -396,7 +398,6 @@ public class SafeKeyboard {
                 int end = mCurrentEditText.getSelectionEnd();
                 if (primaryCode == Keyboard.KEYCODE_CANCEL) {
                     // 隐藏键盘
-//                    hideKeyboard();
                     safeHandler.removeCallbacks(hideRun);
                     safeHandler.removeCallbacks(showRun);
                     safeHandler.post(hideRun/*, HIDE_DELAY*/);
@@ -524,10 +525,8 @@ public class SafeKeyboard {
             type = 1;
         } else if (keyboard == keyboardSymbol) {
             type = 2;
-        } else if (keyboard == keyboardNumber) {
+        } else if (keyboard == keyboardNumber || keyboard == keyboardNumberOnly || keyboard == keyboardIdCard) {
             type = 3;
-        } else if (keyboard == keyboardIdCard) {
-            type = 4;
         } else type = 1;
         mEditLastKeyboardTypeArray.put(mCurrentEditText.getId(), type);
         keyboardType = type;
