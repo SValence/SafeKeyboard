@@ -1,6 +1,8 @@
 # **SafeKeyboard**
 Android自定义安全软键盘，完全自定义，方便、安全、可靠
 
+详见：  [Android 自定义安全软键盘 SafeKeyboard 开发详细说明 2.0](SafeKeyboard.md)
+
 预览<br>
 ![image](SafeKeyboard_preview_1.5x.gif)
 
