@@ -2,6 +2,31 @@
 
 源码地址：GitHub:&nbsp;&nbsp;&nbsp;&nbsp;https://github.com/SValence/SafeKeyboard
 
+<!-- TOC -->
+
+- [**Android 自定义安全软键盘 SafeKeyboard 开发详细说明 2.0**](#android-自定义安全软键盘-safekeyboard-开发详细说明-20)
+    - [**一、Android 安全软键盘开发流程**](#一android-安全软键盘开发流程)
+        - [1. 建立软键盘样式](#1-建立软键盘样式)
+        - [2. 创建 `layout` 布局文件](#2-创建-layout-布局文件)
+        - [3. 自定义 `KeyboardView`](#3-自定义-keyboardview)
+        - [4. 自定义一个普通 `java` 类，一般取名为 `**Keyboard.java`](#4-自定义一个普通-java-类一般取名为-keyboardjava)
+        - [5. 效果图](#5-效果图)
+    - [**二、 `Android` 安全软键盘开发实例解析（仅作参考）**](#二-android-安全软键盘开发实例解析仅作参考)
+        - [1. 创建项目后, 在 `layout` 布局文件中设计基本布局，参考如下](#1-创建项目后-在-layout-布局文件中设计基本布局参考如下)
+        - [2. 在项目 `res` 文件夹下创建 `xml` 文件夹，并创建出自己需要的软键盘布局，比如说：数字，字母，符号等](#2-在项目-res-文件夹下创建-xml-文件夹并创建出自己需要的软键盘布局比如说数字字母符号等)
+        - [3. 整个自定义软键盘布局文件(包括按键布局和点击输入完成隐藏输入法的布局) `layout_keyboard_containor.xml`](#3-整个自定义软键盘布局文件包括按键布局和点击输入完成隐藏输入法的布局-layout_keyboard_containorxml)
+            - [3.1 `com.safe.keyboard.SafeKeyboardView` 中的属性值得关注的有:](#31-comsafekeyboardsafekeyboardview-中的属性值得关注的有)
+    - [**三、 `Android` 安全软键盘功能的 `Java` 逻辑 代码实现**](#三-android-安全软键盘功能的-java-逻辑-代码实现)
+        - [1. `SafeKeyboardView.java` 实现 (源码请查看 `SafeKeyboardView.java` 文件)](#1-safekeyboardviewjava-实现-源码请查看-safekeyboardviewjava-文件)
+        - [2. `SafeKeyboard.java` 实现 （源码请查看 `SafeKeyboard.java` 文件）](#2-safekeyboardjava-实现-源码请查看-safekeyboardjava-文件)
+            - [2.1 设置 `OnKeyboardActionListener` 监听详细介绍](#21-设置-onkeyboardactionlistener-监听详细介绍)
+            - [2.2 隐藏系统默认输入法软键盘](#22-隐藏系统默认输入法软键盘)
+            - [2.3 支持多 `EditText` 共用一个 `SafeKeyboard`](#23-支持多-edittext-共用一个-safekeyboard)
+            - [2.4 `SafeKeyboard` 的显示和隐藏动画](#24-safekeyboard-的显示和隐藏动画)
+            - [2.5 记住每个 `EditText` 上此所显示的键盘类型](#25-记住每个-edittext-上此所显示的键盘类型)
+
+<!-- /TOC -->
+
 ## **一、Android 安全软键盘开发流程**
 
 ### 1. 建立软键盘样式
@@ -10,7 +35,7 @@
 
 - 如下图所示:
 </br></br>
-![image](SafeKeyboard_xml_files.png)
+![image](https://raw.githubusercontent.com/SValence/SafeKeyboard/master/SafeKeyboard_xml_files.png)
 
 ### 2. 创建 `layout` 布局文件
 
@@ -32,7 +57,7 @@
 
 - 如下图所示:
 </br></br>
-<img src="SafeKeyboard_preview_1.5x.gif" width="300" hegiht="600"/>
+<img src="https://raw.githubusercontent.com/SValence/SafeKeyboard/master/SafeKeyboard_preview_1.5x.gif" width="300" hegiht="600"/>
 <!-- ![image](https://raw.githubusercontent.com/SValence/SafeKeyboard/master/SafeKeyboard_preview_1.5x.gif) -->
 
 ## **二、 `Android` 安全软键盘开发实例解析（仅作参考）**
@@ -170,7 +195,7 @@
 
 - 以下为 `Demo` 中已有的多种键盘效果图:
 </br></br>
-<img src="SafeKeyboards_pre_.png" width="700"/>
+<img src="https://raw.githubusercontent.com/SValence/SafeKeyboard/master/SafeKeyboards_pre_.png" width="700"/>
 
 ### 3. 整个自定义软键盘布局文件(包括按键布局和点击输入完成隐藏输入法的布局) `layout_keyboard_containor.xml`
 
