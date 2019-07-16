@@ -3,7 +3,7 @@ Android自定义安全软键盘，完全自定义，方便、安全、可靠
 
 下一步计划：解决 `SafeKeyboard` 在PopupWindow 等控件中显示会崩溃的问题
 
-详见：  [Android 自定义安全软键盘 SafeKeyboard 开发详细说明 2.0](https://github.com/SValence/SafeKeyboard/wiki/Android-自定义安全软键盘-SafeKeyboard-开发详细说明-2.0)
+详见：  [Android 自定义安全软键盘 SafeKeyboard 开发详细说明 2.0](https://github.com/SValence/SafeKeyboard/wiki/SafeKeyboard-2.0)
 
 预览<br>
 ![image](SafeKeyboard_preview_1.5x.gif)
