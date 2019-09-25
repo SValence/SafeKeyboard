@@ -14,7 +14,7 @@ Android自定义安全软键盘，完全自定义，方便、安全、可靠
 * 1 . 解决 `SafeKeyboard` 在 `PopupWindow` 中显示会崩溃的问题 (关闭按键预览功能即可). 见 `issue#3`
 * 2 . 解决 `SafeKeyboard` 显示后遮住目标 `EditText` 问题 (被遮挡时顶起目标 `EditText` 父 `View`). 见 `issue#8`
   <br>暂时只提供这一种解决方案 ( 尚有改进空间 )
-* 3 . 适配 `ScrollView` 中的 `EditText` 使用 `SafeKeyboard` 功能. 详见: &nbsp;&nbsp;[注意事项 (SafeKeyboard_Note)](SafeKeyboard_Note.md)
+* 3 . 适配 `ScrollView` 中的 `EditText` 使用 `SafeKeyboard` 功能. 详见: &nbsp;&nbsp;[注意事项 (SafeKeyboard_Note)](https://github.com/SValence/SafeKeyboard/wiki/Attention-Note)
 * 4 . 解决 `SafeKeyboard` 在 `AlertDialog` 中显示无法点击的问题. 采用 `DialogFragment` 来实现该功能.
 * 5 . 修改多个 `EditText` 共用一个 `SafeKeyboard` 时, `OnTouch` 事件造成 `SafeKeyboard` 显示混乱的 BUG.
 * 6 . 简化部分 API 调用代码, 并增加一个有数字的字母键盘.
