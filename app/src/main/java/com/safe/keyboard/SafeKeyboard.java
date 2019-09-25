@@ -12,19 +12,23 @@ import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.InputType;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -43,22 +47,26 @@ public class SafeKeyboard {
 
     private Context mContext;               //上下文
 
-    private LinearLayout layout;
+    private LinearLayout keyboardParentView;
     private View keyContainer;              //自定义键盘的容器View
     private SafeKeyboardView keyboardView;  //键盘的View
     private Keyboard keyboardNumber;        //数字键盘
     private Keyboard keyboardNumberOnly;    //纯数字键盘
-    private Keyboard keyboardLetter;        //字母键盘
+    private Keyboard keyboardLetterOnly;    //字母键盘
+    private Keyboard keyboardLetterNum;     //字母数字键盘
     private Keyboard keyboardSymbol;        //符号键盘
     private Keyboard keyboardIdCard;        //中国身份证号码键盘
+    private Keyboard keyboardLetter;        //字母键盘总成
     private static boolean isCapes = false;
     private boolean isCapLock = false;
     private boolean isShowStart = false;
     private boolean isHideStart = false;
+    private boolean forbidPreview = false;  // 关闭按键预览功能
+    private boolean letterWithNum = false;  // 字母键盘是否带有数字
     private int keyboardType = 1;
     private static final long HIDE_TIME = 300;
     private static final long SHOW_DELAY = 200;
-    private static final long HIDE_DELAY = 200;
+    private static final long HIDE_DELAY = 50;
     private static final long SHOW_TIME = 300;
     private static final long DELAY_TIME = 100;
     private Handler safeHandler = new Handler(Looper.getMainLooper());
@@ -66,11 +74,13 @@ public class SafeKeyboard {
     private Drawable lowDrawable;
     private Drawable upDrawable;
     private Drawable upDrawableLock;
-    private int keyboardContainerResId;
-    private int keyboardResId;
+    private int keyboardLayoutResId;
+    private int mSafeKeyboardViewId;
 
     private TranslateAnimation showAnimation;
     private TranslateAnimation hideAnimation;
+    private TranslateAnimation showScrollAnimation;
+    private TranslateAnimation hideScrollAnimation;
     private long lastTouchTime;
     private EditText mCurrentEditText;
     private SparseArray<Keyboard.Key> randomDigitKeys;
@@ -82,34 +92,73 @@ public class SafeKeyboard {
     private HashMap<Integer, EditText> mIdCardEditMap;
     private View.OnTouchListener onEditTextTouchListener;
     private View rootView;
+    private View mScrollLayout;
     private ViewTreeObserver.OnGlobalFocusChangeListener onGlobalFocusChangeListener;
     private ViewTreeObserver treeObserver;
+    private ViewPoint downPoint;
+    private ViewPoint upPoint;
+    private int mScreenWidth;
+    private int mScreenHeight;
+    private boolean mNeedScroll;
+    private float toBackSize;
 
     // 已支持多 EditText 共用一个 SafeKeyboard
 
-    SafeKeyboard(Context mContext, LinearLayout layout, int id, int keyId, @NonNull View rootView) {
+    /**
+     * SafeKeyboard 构造方法, 传入必要的参数
+     *
+     * @param mContext            上下文Context
+     * @param keyboardParentView  界面上显示 SafeKeyboard 的 View
+     * @param keyboardLayoutResId SafeKeyboard 样式资源 id
+     * @param mSafeKeyboardViewId 自定义的 SafeKeyboardView id
+     * @param rootView            含有使用了 SafeKeyboard 的 EditText 的界面根布局 View
+     *                            ( 多个 EditText 共用 SafeKeyboard 但其直接父布局不是同一个 View 时, 传入公共父布局)
+     * @param scrollLayout        目标 EditText 父布局 View
+     */
+    SafeKeyboard(Context mContext, LinearLayout keyboardParentView, int keyboardLayoutResId, int mSafeKeyboardViewId,
+                 @NonNull View rootView, @NonNull View scrollLayout) {
+        this(mContext, keyboardParentView, keyboardLayoutResId, mSafeKeyboardViewId, rootView, scrollLayout, false);
+    }
+
+    /**
+     * SafeKeyboard 构造方法, 传入必要的参数
+     *
+     * @param mContext            上下文Context
+     * @param keyboardParentView  界面上显示 SafeKeyboard 的 View
+     * @param keyboardLayoutResId SafeKeyboard 样式资源 id
+     * @param mSafeKeyboardViewId 自定义的 SafeKeyboardView id
+     * @param rootView            含有使用了 SafeKeyboard 的 EditText 的界面根布局 View
+     * @param scrollLayout        目标 EditText 父布局 View
+     *                            ( 多个 EditText 共用 SafeKeyboard 但其直接父布局不是同一个 View 时, 传入公共父布局)
+     * @param letterWithNum       字母键盘是否带有数字
+     */
+    SafeKeyboard(Context mContext, LinearLayout keyboardParentView, int keyboardLayoutResId, int mSafeKeyboardViewId,
+                 @NonNull View rootView, @NonNull View scrollLayout, boolean letterWithNum) {
         this.mContext = mContext;
-        this.layout = layout;
-        this.keyboardContainerResId = id;
-        this.keyboardResId = keyId;
+        this.keyboardParentView = keyboardParentView;
+        this.keyboardLayoutResId = keyboardLayoutResId;
+        this.mSafeKeyboardViewId = mSafeKeyboardViewId;
         this.rootView = rootView;
+        this.mScrollLayout = scrollLayout;
+        this.letterWithNum = letterWithNum;
 
         initData();
         initKeyboard();
         initAnimation();
     }
 
-    SafeKeyboard(Context mContext, LinearLayout layout, int id, int keyId,
-                 Drawable del, Drawable low, Drawable up, Drawable upLock, @NonNull View rootView) {
+    SafeKeyboard(Context mContext, LinearLayout keyboardParentView, int keyboardLayoutResId, int mSafeKeyboardViewId,
+                 Drawable del, Drawable low, Drawable up, Drawable upLock, @NonNull View rootView, @NonNull ViewGroup scrollLayout) {
         this.mContext = mContext;
-        this.layout = layout;
-        this.keyboardContainerResId = id;
-        this.keyboardResId = keyId;
+        this.keyboardParentView = keyboardParentView;
+        this.keyboardLayoutResId = keyboardLayoutResId;
+        this.mSafeKeyboardViewId = mSafeKeyboardViewId;
         this.delDrawable = del;
         this.lowDrawable = low;
         this.upDrawable = up;
         this.upDrawableLock = upLock;
         this.rootView = rootView;
+        this.mScrollLayout = scrollLayout;
 
         initData();
         initKeyboard();
@@ -123,9 +172,24 @@ public class SafeKeyboard {
     private void initData() {
         isCapLock = false;
         isCapes = false;
+        mNeedScroll = false;
+        toBackSize = 0;
+        downPoint = new ViewPoint();
+        upPoint = new ViewPoint();
         mEditMap = new HashMap<>();
         mIdCardEditMap = new HashMap<>();
         mEditLastKeyboardTypeArray = new SparseIntArray();
+
+        // 获取 WindowManager 实例, 得到屏幕的操作权
+        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        if (wm != null) {
+            // 给 metrics 赋值
+            DisplayMetrics metrics = new DisplayMetrics();
+            wm.getDefaultDisplay().getMetrics(metrics);
+            // 设备屏幕的宽度,高度变量
+            mScreenWidth = metrics.widthPixels;
+            mScreenHeight = metrics.heightPixels;
+        }
     }
 
     private void initAnimation() {
@@ -188,23 +252,26 @@ public class SafeKeyboard {
 
     @SuppressLint("ClickableViewAccessibility")
     private void initKeyboard() {
-        keyContainer = LayoutInflater.from(mContext).inflate(keyboardContainerResId, layout, true);
+        keyContainer = LayoutInflater.from(mContext).inflate(keyboardLayoutResId, keyboardParentView, true);
         keyContainer.setVisibility(View.GONE);
         keyboardNumber = new Keyboard(mContext, R.xml.keyboard_num_symbol);     //实例化数字键盘
         // 注: 这里有三个数字键盘,  keyboard_num_symbol:带部分符号;   keyboard_num:可切换的数字键盘;    keyboard_num_only:纯数字键盘, 不可切换
         keyboardNumberOnly = new Keyboard(mContext, R.xml.keyboard_num_only);
 
-        keyboardLetter = new Keyboard(mContext, R.xml.keyboard_letter);         //实例化字母键盘
+        keyboardLetterOnly = new Keyboard(mContext, R.xml.keyboard_letter);         //实例化字母键盘
+        keyboardLetterNum = new Keyboard(mContext, R.xml.keyboard_letter_num);         //实例化字母键盘
         keyboardSymbol = new Keyboard(mContext, R.xml.keyboard_symbol);         //实例化符号键盘
         keyboardIdCard = new Keyboard(mContext, R.xml.keyboard_id_card_zn);     //实例化 IdCard(中国身份证) 键盘
         // 由于符号键盘与字母键盘共用一个KeyBoardView, 所以不需要再为符号键盘单独实例化一个KeyBoardView
+
+        keyboardLetter = letterWithNum ? keyboardLetterNum : keyboardLetterOnly;
 
         lastTouchTime = 0L;
 
         initRandomDigitKeys();
         initIdCardRandomDigitKeys();
 
-        keyboardView = keyContainer.findViewById(keyboardResId);
+        keyboardView = keyContainer.findViewById(mSafeKeyboardViewId);
         if (delDrawable == null)
             delDrawable = mContext.getDrawable(R.drawable.icon_del);
         if (lowDrawable == null)
@@ -307,12 +374,49 @@ public class SafeKeyboard {
             if (v instanceof EditText) {
                 EditText mEditText = (EditText) v;
                 hideSystemKeyBoard(mEditText);
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    keyboardPreShow(mEditText);
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    downPoint.setCoo_x((int) event.getRawX());
+                    downPoint.setCoo_y((int) event.getRawY());
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    upPoint.setCoo_x((int) event.getRawX());
+                    upPoint.setCoo_y((int) event.getRawY());
+                    if (isTouchConsiderClick(downPoint, upPoint, mEditText) && mEditText.hasFocus()) {
+                        if (mCurrentEditText == mEditText && isShow()) {
+                            return false;
+                        }
+                        keyboardPreShow(mEditText);
+                    }
+                    downPoint.clearPoint();
+                    upPoint.clearPoint();
                 }
             }
             return false;
         };
+    }
+
+    /**
+     * 用来计算按下和抬起时的两点位置的关系, 是否可以将此次 Touch 事件 看作 Click 事件
+     * 两点各自的 x/y 轴距离不超过 10, 且两点中心点在目标 EditText 上 时, 返回 true, 否则 false
+     *
+     * @param down      按下时的位置点
+     * @param up        抬起时的位置点
+     * @param mEditText 目标 EditText
+     * @return 是否考虑此次为点击事件
+     */
+    private boolean isTouchConsiderClick(ViewPoint down, ViewPoint up, EditText mEditText) {
+        boolean flag = false;
+        if (Math.abs(down.getCoo_x() - up.getCoo_x()) < 10 && Math.abs(down.getCoo_y() - up.getCoo_y()) < 10) {
+            int[] position = new int[2];
+            mEditText.getLocationOnScreen(position);
+            int width = mEditText.getWidth();
+            int height = mEditText.getHeight();
+            int x = (down.getCoo_x() + up.getCoo_x()) / 2;
+            int y = (down.getCoo_y() + up.getCoo_y()) / 2;
+            if (position[0] + width >= x && position[1] + height >= y)
+                flag = true;
+        }
+
+        return flag;
     }
 
     private void keyboardPreHide() {
@@ -323,16 +427,20 @@ public class SafeKeyboard {
         }
     }
 
-    private void keyboardPreShow(EditText mEditText) {
+    private void keyboardPreShow(final EditText mEditText) {
         safeHandler.removeCallbacks(showRun);
         safeHandler.removeCallbacks(hideRun);
         if (stillNeedOptManually(true)) {
             setCurrentEditText(mEditText);
             safeHandler.postDelayed(showRun, SHOW_DELAY);
         } else {
-            // 如果已经显示了, 那么切换键盘即可
-            setCurrentEditText(mEditText);
-            setKeyboard(getKeyboardByInputType());
+            final long delay = mNeedScroll ? HIDE_TIME + 50 : 0;
+            doScrollLayoutBack(false);
+            new Handler().postDelayed(() -> {
+                // 如果已经显示了, 那么切换键盘即可
+                setCurrentEditText(mEditText);
+                setKeyboard(getKeyboardByInputType());
+            }, delay);
         }
     }
 
@@ -357,15 +465,28 @@ public class SafeKeyboard {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    public void putEditText(int id, EditText mEditText) {
+    public void putEditText(EditText mEditText) {
         if (mEditMap == null) mEditMap = new HashMap<>();
-        mEditMap.put(id, mEditText);
+        mEditMap.put(mEditText.getId(), mEditText);
         mEditText.setOnTouchListener(onEditTextTouchListener);
     }
 
     public void putEditText2IdCardType(int id, EditText mEditText) {
         if (mIdCardEditMap == null) mIdCardEditMap = new HashMap<>();
         mIdCardEditMap.put(id, mEditText);
+    }
+
+    /**
+     * 设置是否强制关闭预览功能
+     * <p>
+     * 解释：因为系统自带的 KeyboardView 的按键预览功能是使用 PopupWindow 来实现的, 那么在
+     * PopupWindow 中使用了 SafeKeyboard (本软键盘), 那么必须关闭预览, 否则会直接崩溃.
+     * ( 即调用 setForbidPreview(true) )
+     *
+     * @param forbidPreview 是否关闭预览
+     */
+    public void setForbidPreview(boolean forbidPreview) {
+        this.forbidPreview = forbidPreview;
     }
 
     // 设置键盘点击监听
@@ -376,12 +497,12 @@ public class SafeKeyboard {
             if (keyboardType == 3) {
                 keyboardView.setPreviewEnabled(false);
             } else {
-                keyboardView.setPreviewEnabled(true);
+                keyboardView.setPreviewEnabled(!forbidPreview);
                 if (primaryCode == -1 || primaryCode == -5 || primaryCode == 32 || primaryCode == -2
                         || primaryCode == 100860 || primaryCode == 100861 || primaryCode == -35) {
                     keyboardView.setPreviewEnabled(false);
                 } else {
-                    keyboardView.setPreviewEnabled(true);
+                    keyboardView.setPreviewEnabled(!forbidPreview);
                 }
             }
         }
@@ -591,7 +712,61 @@ public class SafeKeyboard {
         if (keyContainer.getVisibility() != View.GONE) {
             keyContainer.setVisibility(View.GONE);
         }
+
+        doScrollLayoutBack(true);
     };
+
+    /**
+     * 回落
+     * @param isHide    回落的同时, SafeKeyboard 是否隐藏
+     */
+    private void doScrollLayoutBack(final boolean isHide) {
+        if (mNeedScroll) {
+            mNeedScroll = false;
+
+            hideScrollAnimation = new TranslateAnimation(Animation.ABSOLUTE, mScrollLayout.getLeft(),
+                    Animation.ABSOLUTE, mScrollLayout.getLeft(),
+                    Animation.ABSOLUTE, mScrollLayout.getTop() - (isHide ? 0 : toBackSize),
+                    Animation.ABSOLUTE, mScrollLayout.getTop() - (isHide ? toBackSize : 2 * toBackSize));
+            hideScrollAnimation.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    int[] pos = {mScrollLayout.getLeft(), mScrollLayout.getTop() - (isHide ? 0 : (int) toBackSize),
+                            mScrollLayout.getRight(), mScrollLayout.getBottom() - (isHide ? (int) toBackSize : 2 * (int) toBackSize)};
+                    mScrollLayout.clearAnimation();
+                    mScrollLayout.layout(pos[0], pos[1], pos[2], pos[3]);
+//                    if (mScrollLayout instanceof ScrollView) {
+//                        ScrollView scrollView = (ScrollView) mScrollLayout;
+//                        scrollView.scrollTo(0, mCurrentEditText.getMeasuredHeight());
+//                    }
+                    hideScrollAnimation = null;
+                    toBackSize = 0;
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+                }
+            });
+            hideScrollAnimation.setDuration(HIDE_TIME);
+            hideScrollAnimation.setFillAfter(true);
+            mScrollLayout.startAnimation(hideScrollAnimation);
+        }
+    }
+
+    /**
+     * 顶起
+     */
+    private void doScrollLayout() {
+        // 计算 SafeKeyboard 显示后是否会遮挡住 EditText
+        editNeedScroll(mCurrentEditText);
+        if (mNeedScroll) {
+            mScrollLayout.startAnimation(showScrollAnimation);
+        }
+    }
 
     private final Runnable showEnd = () -> {
         isShowStart = false;
@@ -602,6 +777,9 @@ public class SafeKeyboard {
             safeHandler.removeCallbacks(showRun);
             safeHandler.postDelayed(hideRun, HIDE_DELAY);
         }
+
+        // 这个只能在 keyContainer 显示后才能调用, 只有这个时候才能获取到 keyContainer 的宽、高值
+        doScrollLayout();
     };
 
     private void showKeyboard() {
@@ -614,6 +792,46 @@ public class SafeKeyboard {
         keyContainer.setVisibility(View.VISIBLE);
         keyContainer.clearAnimation();
         keyContainer.startAnimation(showAnimation);
+    }
+
+    /**
+     * @param mEditText 目标 EditText
+     */
+    private void editNeedScroll(EditText mEditText) {
+        int keyboardHeight = keyContainer.getHeight();
+        int keyStartY = mScreenHeight - keyboardHeight;
+        int[] position = new int[2];
+        mEditText.getLocationOnScreen(position);
+        int mEditTextY = position[1] + mEditText.getHeight();
+        mNeedScroll = mEditTextY - keyStartY > 0;
+        if (mNeedScroll) {
+            final float to = keyStartY - (mEditTextY + mEditText.getHeight()) - 10;
+            toBackSize = to;
+            showScrollAnimation = new TranslateAnimation(Animation.ABSOLUTE, mScrollLayout.getLeft(),
+                    Animation.ABSOLUTE, mScrollLayout.getLeft(),
+                    Animation.ABSOLUTE, mScrollLayout.getTop(),
+                    Animation.ABSOLUTE, mScrollLayout.getTop() + to);
+            showScrollAnimation.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    int[] pos = {mScrollLayout.getLeft(), mScrollLayout.getTop() + (int) to,
+                            mScrollLayout.getRight(), mScrollLayout.getBottom() + (int) to};
+                    mScrollLayout.clearAnimation();
+                    mScrollLayout.layout(pos[0], pos[1], pos[2], pos[3]);
+                    showScrollAnimation = null;
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+                }
+            });
+            showScrollAnimation.setDuration(SHOW_TIME);
+            showScrollAnimation.setFillAfter(true);
+        }
     }
 
     private Keyboard getKeyboardByInputType() {
@@ -710,7 +928,7 @@ public class SafeKeyboard {
         return keyContainer.getVisibility() == View.VISIBLE;
     }
 
-    private boolean stillNeedOptManually(boolean preferShow) {
+    public boolean stillNeedOptManually(boolean preferShow) {
         boolean flag;
         if (preferShow) {
             // 想要显示

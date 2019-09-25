@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/popupRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PopupWindowActivity">
+
+    <LinearLayout
+        android:id="@+id/popupWindowPlace"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" />
+
+    <CheckBox
+        android:id="@+id/use_safe_key2"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:layout_marginStart="10sp"
+        android:layout_marginEnd="10sp"
+        android:checked="true"
+        android:text="@string/use_safe_pop"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginStart="10sp"
+        android:layout_marginEnd="10sp"
+        android:onClick="onPopupWindowClick"
+        android:text="@string/popup_test"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/use_safe_key2" />
+
+</android.support.constraint.ConstraintLayout>

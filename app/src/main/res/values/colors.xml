@@ -15,4 +15,5 @@
     <color name="keyboardDeep">#991c69ac</color>
     <color name="keyboardPress">#1296db</color>
     <color name="colorRed">#FF0000</color>
+    <color name="deepDarkTransparent">#99222222</color>
 </resources>

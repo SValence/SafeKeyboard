@@ -35,7 +35,8 @@
 
 - 如下图所示:
 </br></br>
-![image](https://raw.githubusercontent.com/SValence/SafeKeyboard/master/SafeKeyboard_xml_files.png)
+![image](explain_files/SafeKeyboard_xml_files.png)
+<!-- ![image](https://raw.githubusercontent.com/SValence/SafeKeyboard/master/SafeKeyboard_xml_files.png) -->
 
 ### 2. 创建 `layout` 布局文件
 
@@ -57,7 +58,8 @@
 
 - 如下图所示:
 </br></br>
-<img src="https://raw.githubusercontent.com/SValence/SafeKeyboard/master/SafeKeyboard_preview_1.5x.gif" width="300" hegiht="600"/>
+<img src="explain_files/SafeKeyboard_preview_1.5x.gif" width="300" hegiht="600"/>
+<!-- <img src="https://raw.githubusercontent.com/SValence/SafeKeyboard/master/SafeKeyboard_preview_1.5x.gif" width="300" hegiht="600"/> -->
 <!-- ![image](https://raw.githubusercontent.com/SValence/SafeKeyboard/master/SafeKeyboard_preview_1.5x.gif) -->
 
 ## **二、 `Android` 安全软键盘开发实例解析（仅作参考）**
@@ -195,7 +197,8 @@
 
 - 以下为 `Demo` 中已有的多种键盘效果图:
 </br></br>
-<img src="https://raw.githubusercontent.com/SValence/SafeKeyboard/master/SafeKeyboards_pre_.png" width="700"/>
+<img src="explain_files/SafeKeyboards_pre_.png" width="700"/>
+<!-- <img src="https://raw.githubusercontent.com/SValence/SafeKeyboard/master/SafeKeyboards_pre_.png" width="700"/> -->
 
 ### 3. 整个自定义软键盘布局文件(包括按键布局和点击输入完成隐藏输入法的布局) `layout_keyboard_containor.xml`
 

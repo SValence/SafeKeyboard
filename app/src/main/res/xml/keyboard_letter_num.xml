@@ -4,6 +4,53 @@
     android:keyWidth="10%p"
     android:keyHeight="@dimen/key_height"
     android:verticalGap="@dimen/key_vertical_gap">
+
+    <Row>
+        <Key
+            android:codes="49"
+            android:horizontalGap="1%p"
+            android:keyWidth="8.9%p"
+            android:keyEdgeFlags="left"
+            android:keyLabel="1" />
+        <Key
+            android:codes="50"
+            android:keyWidth="8.9%p"
+            android:keyLabel="2" />
+        <Key
+            android:codes="51"
+            android:keyWidth="8.9%p"
+            android:keyLabel="3" />
+        <Key
+            android:codes="52"
+            android:keyWidth="8.9%p"
+            android:keyLabel="4" />
+        <Key
+            android:codes="53"
+            android:keyWidth="8.9%p"
+            android:keyLabel="5" />
+        <Key
+            android:codes="54"
+            android:keyWidth="8.9%p"
+            android:keyLabel="6" />
+        <Key
+            android:codes="55"
+            android:keyWidth="8.9%p"
+            android:keyLabel="7" />
+        <Key
+            android:codes="56"
+            android:keyWidth="8.9%p"
+            android:keyLabel="8" />
+        <Key
+            android:codes="57"
+            android:keyWidth="8.9%p"
+            android:keyLabel="9" />
+        <Key
+            android:codes="48"
+            android:keyWidth="8.9%p"
+            android:keyEdgeFlags="right"
+            android:keyLabel="0" />
+    </Row>
+
     <Row>
         <Key
             android:codes="113"
