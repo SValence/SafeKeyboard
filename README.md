@@ -1,7 +1,7 @@
 # **SafeKeyboard**
 Android自定义安全软键盘，完全自定义，方便、安全、可靠
 
-下一步计划：改进键盘遮挡解决方案、增加换肤、一键使用、打包发布等功能
+下一步计划：增加换肤、一键使用、打包发布等功能
 
 详见:  [Android 自定义安全软键盘 SafeKeyboard 开发详细说明 2.0](https://github.com/SValence/SafeKeyboard/wiki/SafeKeyboard-2.0)
 
@@ -9,6 +9,11 @@ Android自定义安全软键盘，完全自定义，方便、安全、可靠
 ![image](explain_files/SafeKeyboard_preview_1.5x.gif)
 
 ## **历史更新**
+
+### 四、 2019/11/17
+* 1 . 修改 `SafeKeyboard` 显示后遮住目标 `EditText` 问题 (被遮挡时顶起目标 `EditText` 父 `View`) 功能实现逻辑, 解决动画效果不尽如人意的 BUG.
+* 2 . 增加按键震动功能(可选)
+
 
 ### 三、 2019/09/26
 * 1 . 解决 `SafeKeyboard` 在 `PopupWindow` 中显示会崩溃的问题 (关闭按键预览功能即可). 见 `issue#3`

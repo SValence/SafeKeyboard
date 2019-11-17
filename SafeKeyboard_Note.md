@@ -209,7 +209,7 @@ android.view.WindowManager$BadTokenException: Unable to add window -- token andr
      * 回落
      * @param isHide    回落的同时, SafeKeyboard 是否隐藏
      */
-    private void doScrollLayoutBack(final boolean isHide) {
+    private void doScrollLayoutBack(final boolean isHide, EditText mEditText) {
         ...
     }
 
@@ -227,8 +227,24 @@ android.view.WindowManager$BadTokenException: Unable to add window -- token andr
 
 #### 3. 当 `EditText` 需要被 “顶起” 遇到 `EditText` 被 `ScrollView` 包裹时
 
+<font color=red size=8>以下问题已不复存在</font></br>
 * 当出现上述情况时, 创建 `SafeKeyboard` 对象传入 `ScrollView` 或者 `ScrollView` 的直接子布局 `View` 时, 动画效果都会出现问题 ; 
 * 为解决该问题, 我们可以在 `ScrollView` 上再包一层 `View` 并传入 `SafeKeyboard` . 
+  
+</br>
+<font color=red size=8>以上问题已不复存在</font></br>
+
+已采用其他办法实现 `EditText` 被顶起逻辑. 不需要再在 `ScrollView` 上再包一层 `View` 
+
+需要在 `AndroidManifest` 文件的 `Activity` 节点下增加: `android:windowSoftInputMode="stateAlwaysHidden|adjustPan"` 以优化显示和效果
+
+示例:
+```xml
+    <activity
+            android:name=".ScrollViewEditActivity"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />
+```
+
 
 效果图 :
 
@@ -236,4 +252,4 @@ android.view.WindowManager$BadTokenException: Unable to add window -- token andr
 
 至此解决 `SafeKeyboard` 遮挡 `EditText` 以及 特殊的遇到 `ScrollView` 等问题
 
-<font color=red size=8>注意， 顶起逻辑有待完善</font></br>
+<font color=red size=8>顶起逻辑已完善</font></br>

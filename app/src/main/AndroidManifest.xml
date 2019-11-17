@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.safe.keyboard">
 
+    <uses-permission android:name="android.permission.VIBRATE" />   <!-- 震动权限 -->
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,9 +11,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".DialogSafeKeyboardActivity"></activity>
-        <activity android:name=".PopupWindowActivity" />
-        <activity android:name=".ScrollViewEditActivity" />
+        <activity
+            android:name=".DialogSafeKeyboardActivity"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />
+        <activity
+            android:name=".PopupWindowActivity"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />
+        <activity
+            android:name=".ScrollViewEditActivity"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />
         <activity
             android:name=".MainActivity"
             android:windowSoftInputMode="stateAlwaysHidden|adjustPan">

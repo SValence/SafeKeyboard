@@ -5,8 +5,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatEditText;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -23,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
         EditText safeEdit2 = findViewById(R.id.safeEditText2);
         EditText safeEdit3 = findViewById(R.id.safeEditText3);
         EditText safeEdit4 = findViewById(R.id.safeEditText4);
+        EditText safeEdit5 = findViewById(R.id.safeEditText5);
         AppCompatEditText appCompatEditText = findViewById(R.id.safeAppCompactEditText);
         View rootView = findViewById(R.id.main_root);
         View scrollLayout = findViewById(R.id.scroll_layout);
@@ -33,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
         safeKeyboard.putEditText(safeEdit2);
         safeKeyboard.putEditText(safeEdit3);
         safeKeyboard.putEditText(safeEdit4);
+        safeKeyboard.putEditText(safeEdit5);
         safeKeyboard.putEditText(appCompatEditText);
         safeKeyboard.putEditText2IdCardType(safeEdit3.getId(), safeEdit3);
 //        safeKeyboard.setDelDrawable(this.getResources().getDrawable(R.drawable.icon_del));

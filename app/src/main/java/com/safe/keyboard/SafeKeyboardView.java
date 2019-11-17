@@ -27,6 +27,7 @@ public class SafeKeyboardView extends KeyboardView {
     private Context mContext;
     private boolean isCap;
     private boolean isCapLock;
+    private boolean enableVibrate;
     private Drawable delDrawable;
     private Drawable lowDrawable;
     private Drawable upDrawable;
@@ -44,6 +45,7 @@ public class SafeKeyboardView extends KeyboardView {
 //    private final static boolean ONLY_ID_CARD = false;
     private boolean rememberLastType;     // 仅显示 身份证 键盘
     private final static boolean REM_LAST_TYPE = true;
+    private final static boolean DEFAULT_ENABLE_VIBRATE = false;
 
     public SafeKeyboardView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -67,6 +69,7 @@ public class SafeKeyboardView extends KeyboardView {
             randomDigit = array.getBoolean(R.styleable.SafeKeyboardView_random_digit, DIGIT_RANDOM);
             // onlyIdCard = array.getBoolean(R.styleable.SafeKeyboardView_only_id_card, ONLY_ID_CARD);
             rememberLastType = array.getBoolean(R.styleable.SafeKeyboardView_remember_last_type, REM_LAST_TYPE);
+            enableVibrate = array.getBoolean(R.styleable.SafeKeyboardView_enable_vibrate, DEFAULT_ENABLE_VIBRATE);
             array.recycle();
         }
     }
@@ -96,6 +99,14 @@ public class SafeKeyboardView extends KeyboardView {
 
     public boolean isRememberLastType() {
         return rememberLastType;
+    }
+
+    public boolean isVibrateEnable() {
+        return enableVibrate;
+    }
+
+    public void enableVibrate(boolean enableVibrate) {
+        this.enableVibrate = enableVibrate;
     }
 
     @Override

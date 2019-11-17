@@ -7,80 +7,76 @@
     android:layout_height="match_parent"
     tools:context=".ScrollViewEditActivity">
 
-    <FrameLayout
-        android:id="@+id/scrollViewScrollLayout"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ScrollView
+        <LinearLayout
+            android:id="@+id/scrollViewScrollLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:orientation="vertical">
 
-            <LinearLayout
+            <EditText
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:orientation="vertical">
+                android:layout_height="80dp"
+                android:hint="EditText 01"
+                android:inputType="none" />
 
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:hint="EditText 01"
-                    android:inputType="none" />
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:hint="EditText 02"
+                android:inputType="none" />
 
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:hint="EditText 02"
-                    android:inputType="none" />
+            <EditText
+                android:id="@+id/safeEdit2"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:hint="@string/keyboard_demo_new"
+                android:inputType="none" />
 
-                <EditText
-                    android:id="@+id/safeEdit2"
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:hint="@string/keyboard_demo_new"
-                    android:inputType="none" />
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:hint="EditText 04"
+                android:inputType="none" />
 
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:hint="EditText 04"
-                    android:inputType="none" />
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:hint="EditText 05"
+                android:inputType="none" />
 
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:hint="EditText 05"
-                    android:inputType="none" />
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:hint="EditText 06"
+                android:inputType="none" />
 
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:hint="EditText 06"
-                    android:inputType="none" />
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:hint="EditText 07"
+                android:inputType="none" />
 
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:hint="EditText 07"
-                    android:inputType="none" />
+            <EditText
+                android:id="@+id/safeEdit8"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:hint="@string/safe_keyboard"
+                android:inputType="none" />
 
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:hint="EditText 08"
-                    android:inputType="none" />
-
-                <EditText
-                    android:id="@+id/safeEdit"
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:hint="@string/safe_keyboard"
-                    android:inputType="none" />
-            </LinearLayout>
-        </ScrollView>
-    </FrameLayout>
+            <EditText
+                android:id="@+id/safeEdit"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:hint="@string/safe_keyboard"
+                android:inputType="none" />
+        </LinearLayout>
+    </ScrollView>
 
     <LinearLayout
         android:id="@+id/keyboardPlace"

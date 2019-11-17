@@ -4,88 +4,130 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/scroll_layout"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <EditText
-            android:id="@+id/normalEditText"
-            android:layout_width="match_parent"
-            android:layout_height="50sp"
-            android:layout_marginStart="10sp"
-            android:layout_marginEnd="10sp"
-            android:hint="@string/keyboard_system"
-            android:inputType="text" />
-
-        <EditText
-            android:id="@+id/safeEditText"
-            android:layout_width="match_parent"
-            android:layout_height="50sp"
-            android:layout_marginStart="10sp"
-            android:layout_marginEnd="10sp"
-            android:hint="@string/keyboard_demo_new"
-            android:inputType="textVisiblePassword" />
-
-        <EditText
-            android:id="@+id/safeEditText2"
-            android:layout_width="match_parent"
-            android:layout_height="50sp"
-            android:layout_marginStart="10sp"
-            android:layout_marginEnd="10sp"
-            android:hint="@string/keyboard_demo_new2"
-            android:inputType="number" />
-
-        <EditText
-            android:id="@+id/safeEditText3"
-            android:layout_width="match_parent"
-            android:layout_height="50sp"
-            android:layout_marginStart="10sp"
-            android:layout_marginEnd="10sp"
-            android:hint="@string/keyboard_demo_new3" />
-
-        <android.support.v7.widget.AppCompatEditText
-            android:id="@+id/safeAppCompactEditText"
+        <LinearLayout
+            android:id="@+id/scroll_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10sp"
-            android:layout_marginEnd="10sp"
-            android:hint="AppCompatEditText" />
+            android:orientation="vertical">
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginStart="10sp"
-            android:layout_marginEnd="10sp"
-            android:onClick="onAlertDialogClick"
-            android:text="@string/alert_test" />
+            <EditText
+                android:id="@+id/normalEditText"
+                android:layout_width="match_parent"
+                android:layout_height="50sp"
+                android:layout_marginStart="10sp"
+                android:layout_marginEnd="10sp"
+                android:hint="@string/keyboard_system"
+                android:inputType="text" />
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginStart="10sp"
-            android:layout_marginEnd="10sp"
-            android:onClick="onPopupWindowTestClick"
-            android:text="@string/popup_test" />
+            <EditText
+                android:id="@+id/safeEditText"
+                android:layout_width="match_parent"
+                android:layout_height="50sp"
+                android:layout_marginStart="10sp"
+                android:layout_marginEnd="10sp"
+                android:hint="@string/keyboard_demo_new"
+                android:inputType="textVisiblePassword" />
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginStart="10sp"
-            android:layout_marginEnd="10sp"
-            android:onClick="onScrollEditTestClick"
-            android:text="@string/scroll_view_test" />
+            <EditText
+                android:id="@+id/safeEditText2"
+                android:layout_width="match_parent"
+                android:layout_height="50sp"
+                android:layout_marginStart="10sp"
+                android:layout_marginEnd="10sp"
+                android:hint="@string/keyboard_demo_new2"
+                android:inputType="number" />
 
-        <EditText
-            android:id="@+id/safeEditText4"
-            android:layout_width="match_parent"
-            android:layout_height="50sp"
-            android:layout_marginStart="10sp"
-            android:layout_marginEnd="10sp"
-            android:hint="@string/keyboard_demo_new" />
+            <EditText
+                android:id="@+id/safeEditText3"
+                android:layout_width="match_parent"
+                android:layout_height="50sp"
+                android:layout_marginStart="10sp"
+                android:layout_marginEnd="10sp"
+                android:hint="@string/keyboard_demo_new3" />
 
-    </LinearLayout>
+            <android.support.v7.widget.AppCompatEditText
+                android:id="@+id/safeAppCompactEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10sp"
+                android:layout_marginEnd="10sp"
+                android:hint="AppCompatEditText" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginStart="10sp"
+                android:layout_marginEnd="10sp"
+                android:onClick="onAlertDialogClick"
+                android:text="@string/alert_test" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginStart="10sp"
+                android:layout_marginEnd="10sp"
+                android:onClick="onPopupWindowTestClick"
+                android:text="@string/popup_test" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginStart="10sp"
+                android:layout_marginEnd="10sp"
+                android:onClick="onScrollEditTestClick"
+                android:text="@string/scroll_view_test" />
+
+            <EditText
+                android:id="@+id/safeEditText4"
+                android:layout_width="match_parent"
+                android:layout_height="50sp"
+                android:layout_marginStart="10sp"
+                android:layout_marginEnd="10sp"
+                android:hint="@string/keyboard_demo_new"
+                android:inputType="number" />
+
+            <EditText
+                android:id="@+id/safeEditText5"
+                android:layout_width="match_parent"
+                android:layout_height="50sp"
+                android:layout_marginStart="10sp"
+                android:layout_marginEnd="10sp"
+                android:hint="@string/keyboard_demo_new" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="50sp"
+                android:layout_marginStart="10sp"
+                android:layout_marginEnd="10sp"
+                android:hint="@string/keyboard_system" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="50sp"
+                android:layout_marginStart="10sp"
+                android:layout_marginEnd="10sp"
+                android:hint="@string/keyboard_system" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="50sp"
+                android:layout_marginStart="10sp"
+                android:layout_marginEnd="10sp"
+                android:hint="@string/keyboard_system" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="50sp"
+                android:layout_marginStart="10sp"
+                android:layout_marginEnd="10sp"
+                android:hint="@string/keyboard_system" />
+
+        </LinearLayout>
+    </ScrollView>
 
     <LinearLayout
         android:id="@+id/keyboardPlace"
