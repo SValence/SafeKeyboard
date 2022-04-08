@@ -15,7 +15,7 @@
         - [1. 创建项目后, 在 `layout` 布局文件中设计基本布局，参考如下](#1-创建项目后-在-layout-布局文件中设计基本布局参考如下)
         - [2. 在项目 `res` 文件夹下创建 `xml` 文件夹，并创建出自己需要的软键盘布局，比如说：数字，字母，符号等](#2-在项目-res-文件夹下创建-xml-文件夹并创建出自己需要的软键盘布局比如说数字字母符号等)
         - [3. 整个自定义软键盘布局文件(包括按键布局和点击输入完成隐藏输入法的布局) `layout_keyboard_containor.xml`](#3-整个自定义软键盘布局文件包括按键布局和点击输入完成隐藏输入法的布局-layout_keyboard_containorxml)
-            - [3.1 `com.safe.keyboard.SafeKeyboardView` 中的属性值得关注的有:](#31-comsafekeyboardsafekeyboardview-中的属性值得关注的有)
+            - [3.1 `com.valence.safe.keyboard.SafeKeyboardView` 中的属性值得关注的有:](#31-comsafekeyboardsafekeyboardview-中的属性值得关注的有)
     - [**三、 `Android` 安全软键盘功能的 `Java` 逻辑 代码实现**](#三-android-安全软键盘功能的-java-逻辑-代码实现)
         - [1. `SafeKeyboardView.java` 实现 (源码请查看 `SafeKeyboardView.java` 文件)](#1-safekeyboardviewjava-实现-源码请查看-safekeyboardviewjava-文件)
         - [2. `SafeKeyboard.java` 实现 （源码请查看 `SafeKeyboard.java` 文件）](#2-safekeyboardjava-实现-源码请查看-safekeyboardjava-文件)
@@ -67,7 +67,6 @@
 ### 1. 创建项目后, 在 `layout` 布局文件中设计基本布局，参考如下
 
 ```xml
-<!-- 详情请查看项目中 activity_main.xml 文件 -->
 
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -138,7 +137,6 @@
 - 字母键盘布局示例:
 
 ```xml
-<!-- 详情及其他键盘布局请查看项目中 /res/xml 文件夹 -->
 
 <?xml version="1.0" encoding="utf-8"?>
 <Keyboard xmlns:android="http://schemas.android.com/apk/res/android"
@@ -270,7 +268,7 @@
         android:layout_marginTop="2sp"
         android:layout_marginBottom="10sp">
 
-        <com.safe.keyboard.SafeKeyboardView
+        <com.valence.safe.keyboard.SafeKeyboardView
             android:id="@+id/safeKeyboardLetter"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -290,7 +288,7 @@
 </LinearLayout>
 ```
 
-#### 3.1 `com.safe.keyboard.SafeKeyboardView` 中的属性值得关注的有:
+#### 3.1 `com.valence.safe.keyboard.SafeKeyboardView` 中的属性值得关注的有:
 
 - `background="@color/keyboardBackColor"` </br>
     `background` 设置了每个按键的点击背景变化， 这个是统一的设置的, <Key> 标签不支持单独设置背景, 当然有办法可以实现单独设置背景, 后面会继续介绍

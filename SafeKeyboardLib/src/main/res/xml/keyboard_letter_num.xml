@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Keyboard xmlns:android="http://schemas.android.com/apk/res/android"
+    android:horizontalGap="1%p"
+    android:keyWidth="10%p"
+    android:keyHeight="@dimen/key_height"
+    android:verticalGap="@dimen/key_vertical_gap">
+
+    <Row>
+        <Key
+            android:codes="49"
+            android:horizontalGap="1%p"
+            android:keyWidth="8.9%p"
+            android:keyEdgeFlags="left"
+            android:keyLabel="1" />
+        <Key
+            android:codes="50"
+            android:keyWidth="8.9%p"
+            android:keyLabel="2" />
+        <Key
+            android:codes="51"
+            android:keyWidth="8.9%p"
+            android:keyLabel="3" />
+        <Key
+            android:codes="52"
+            android:keyWidth="8.9%p"
+            android:keyLabel="4" />
+        <Key
+            android:codes="53"
+            android:keyWidth="8.9%p"
+            android:keyLabel="5" />
+        <Key
+            android:codes="54"
+            android:keyWidth="8.9%p"
+            android:keyLabel="6" />
+        <Key
+            android:codes="55"
+            android:keyWidth="8.9%p"
+            android:keyLabel="7" />
+        <Key
+            android:codes="56"
+            android:keyWidth="8.9%p"
+            android:keyLabel="8" />
+        <Key
+            android:codes="57"
+            android:keyWidth="8.9%p"
+            android:keyLabel="9" />
+        <Key
+            android:codes="48"
+            android:keyWidth="8.9%p"
+            android:keyEdgeFlags="right"
+            android:keyLabel="0" />
+    </Row>
+
+    <Row>
+        <Key
+            android:codes="113"
+            android:horizontalGap="1%p"
+            android:keyWidth="8.9%p"
+            android:keyEdgeFlags="left"
+            android:keyLabel="q" />
+        <Key
+            android:codes="119"
+            android:keyWidth="8.9%p"
+            android:keyLabel="w" />
+        <Key
+            android:codes="101"
+            android:keyWidth="8.9%p"
+            android:keyLabel="e" />
+        <Key
+            android:codes="114"
+            android:keyWidth="8.9%p"
+            android:keyLabel="r" />
+        <Key
+            android:codes="116"
+            android:keyWidth="8.9%p"
+            android:keyLabel="t" />
+        <Key
+            android:codes="121"
+            android:keyWidth="8.9%p"
+            android:keyLabel="y" />
+        <Key
+            android:codes="117"
+            android:keyWidth="8.9%p"
+            android:keyLabel="u" />
+        <Key
+            android:codes="105"
+            android:keyWidth="8.9%p"
+            android:keyLabel="i" />
+        <Key
+            android:codes="111"
+            android:keyWidth="8.9%p"
+            android:keyLabel="o" />
+        <Key
+            android:codes="112"
+            android:keyWidth="8.9%p"
+            android:keyEdgeFlags="right"
+            android:keyLabel="p" />
+    </Row>
+
+    <Row>
+        <Key
+            android:codes="97"
+            android:horizontalGap="5.5%p"
+            android:keyWidth="9%p"
+            android:keyEdgeFlags="left"
+            android:keyLabel="a" />
+        <Key
+            android:codes="115"
+            android:keyWidth="9%p"
+            android:keyLabel="s" />
+        <Key
+            android:codes="100"
+            android:keyWidth="9%p"
+            android:keyLabel="d" />
+        <Key
+            android:codes="102"
+            android:keyWidth="9%p"
+            android:keyLabel="f" />
+        <Key
+            android:codes="103"
+            android:keyWidth="9%p"
+            android:keyLabel="g" />
+        <Key
+            android:codes="104"
+            android:keyWidth="9%p"
+            android:keyLabel="h" />
+        <Key
+            android:codes="106"
+            android:keyWidth="9%p"
+            android:keyLabel="j" />
+        <Key
+            android:codes="107"
+            android:keyWidth="9%p"
+            android:keyLabel="k" />
+        <Key
+            android:codes="108"
+            android:keyWidth="9%p"
+            android:keyEdgeFlags="right"
+            android:keyLabel="l" />
+    </Row>
+
+    <Row>
+        <Key
+            android:codes="-1"
+            android:isModifier="true"
+            android:isSticky="true"
+            android:keyWidth="13%p"
+            android:keyEdgeFlags="left" />
+        <Key
+            android:codes="122"
+            android:horizontalGap="1.5%p"
+            android:keyWidth="9%p"
+            android:keyLabel="z" />
+        <Key
+            android:codes="120"
+            android:keyWidth="9%p"
+            android:keyLabel="x" />
+        <Key
+            android:codes="99"
+            android:keyWidth="9%p"
+            android:keyLabel="c" />
+        <Key
+            android:codes="118"
+            android:keyWidth="9%p"
+            android:keyLabel="v" />
+        <Key
+            android:codes="98"
+            android:keyWidth="9%p"
+            android:keyLabel="b" />
+        <Key
+            android:codes="110"
+            android:keyWidth="9%p"
+            android:keyLabel="n" />
+        <Key
+            android:codes="109"
+            android:keyWidth="9%p"
+            android:keyLabel="m" />
+        <Key
+            android:codes="-5"
+            android:horizontalGap="1.5%p"
+            android:isRepeatable="true"
+            android:keyWidth="13%p" />
+    </Row>
+
+    <Row android:rowEdgeFlags="bottom">
+        <Key
+            android:codes="-2"
+            android:keyWidth="17%p"
+            android:keyLabel="123" />
+        <Key
+            android:codes="44"
+            android:keyWidth="12%p"
+            android:keyLabel="," />
+        <Key
+            android:codes="32"
+            android:isRepeatable="false"
+            android:keyWidth="36%p"
+            android:keyLabel="space" />
+        <Key
+            android:codes="46"
+            android:keyWidth="12%p"
+            android:keyLabel="." />
+        <Key
+            android:codes="100860"
+            android:keyWidth="17%p"
+            android:keyEdgeFlags="right"
+            android:keyLabel="#+=" />
+    </Row>
+</Keyboard>

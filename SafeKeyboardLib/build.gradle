@@ -1,21 +1,25 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 30
+
+
     defaultConfig {
-        applicationId "com.safe.keyboard"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 2
-        versionName "1.20"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        // 2.0.224.4 2.0 版本, 22年 4月份(22 + 4), 4日
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
     }
+
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
@@ -24,10 +28,11 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-     implementation project(path: ':SafeKeyboardLib')
-//    implementation fileTree(include: ['*.aar'], dir: 'libs')
+
     implementation 'androidx.appcompat:appcompat:1.2.0'
+    // implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    // implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'

@@ -3,7 +3,6 @@ package com.safe.keyboard;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +12,10 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.valence.safe.keyboard.SafeKeyboard;
 
 public class PopupWindowActivity extends AppCompatActivity {
 
@@ -37,12 +40,11 @@ public class PopupWindowActivity extends AppCompatActivity {
                 return;
             }
             View windowView = inflater.inflate(R.layout.layout_single_edit, null, false);
-            EditText safeEditPop = windowView.findViewById(R.id.single_edit);
+            EditText safeEditPop = windowView.findViewById(R.id.safe_keyboard_sin_edit);
             if (safeKeyboard == null) {
-                LinearLayout keyboardContainer = windowView.findViewById(R.id.keyboardPlace);
+                LinearLayout keyboardContainer = windowView.findViewById(R.id.safe_keyboard_place);
                 View rootView = windowView.findViewById(R.id.popupEditRoot);
-                safeKeyboard = new SafeKeyboard(getApplicationContext(), keyboardContainer,
-                        R.layout.layout_keyboard_containor, R.id.safeKeyboardLetter, rootView, safeEditPop);
+                safeKeyboard = new SafeKeyboard(getApplicationContext(), keyboardContainer, rootView, safeEditPop);
                 // 默认的预览功能是使用 PopupWindow 实现的, 而 PopupWindow 中不能再弹出 PopupWindow, 所以这里需要关闭预览功能
                 safeKeyboard.setForbidPreview(true);
             }

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SafeKeyboardView">
+        <attr name="random_digit" format="boolean" />                   <!-- 数字随机显示 -->
+        <attr name="random_letter" format="boolean" />                  <!-- 字母随机显示 -->
+        <attr name="remember_last_type" format="boolean" />             <!-- 记住上次键盘输入类型 -->
+        <attr name="enable_vibrate" format="boolean" />                 <!-- 开启震动 -->
+    </declare-styleable>
+</resources>

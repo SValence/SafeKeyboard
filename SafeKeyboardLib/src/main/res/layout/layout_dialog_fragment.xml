@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/dialog_fragment_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/dialog_scroll_layout"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/safe_keyboard_dialog_scroll_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/dialog_title"
+            android:id="@+id/safe_keyboard_dialog_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/description"
@@ -29,16 +29,16 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
-            android:id="@+id/safeEditText5"
+            android:id="@+id/safe_keyboard_safe_edit"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:hint="@string/keyboard_demo_new"
             android:textColor="@color/black"
-            app:layout_constraintLeft_toLeftOf="@id/dialog_title"
-            app:layout_constraintTop_toBottomOf="@id/dialog_title" />
+            app:layout_constraintLeft_toLeftOf="@id/safe_keyboard_dialog_title"
+            app:layout_constraintTop_toBottomOf="@id/safe_keyboard_dialog_title" />
 
         <Button
-            android:id="@+id/dialog_fragment_confirm"
+            android:id="@+id/safe_keyboard_dialog_confirm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_keyboard_dialog_button"
@@ -46,10 +46,10 @@
             android:textColor="@color/colorAccent"
             android:textSize="@dimen/dialog_button_text_size"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/safeEditText5" />
+            app:layout_constraintTop_toBottomOf="@+id/safe_keyboard_safe_edit" />
 
         <Button
-            android:id="@+id/dialog_fragment_cancel"
+            android:id="@+id/safe_keyboard_dialog_cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="5dp"
@@ -57,13 +57,13 @@
             android:text="@string/cancel"
             android:textColor="@color/colorAccent"
             android:textSize="@dimen/dialog_button_text_size"
-            app:layout_constraintRight_toLeftOf="@+id/dialog_fragment_confirm"
-            app:layout_constraintTop_toBottomOf="@+id/safeEditText5" />
+            app:layout_constraintRight_toLeftOf="@+id/safe_keyboard_dialog_confirm"
+            app:layout_constraintTop_toBottomOf="@+id/safe_keyboard_safe_edit" />
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
-        android:id="@+id/keyboardPlace"
+        android:id="@+id/safe_keyboard_place"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="0dp"
@@ -72,4 +72,4 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

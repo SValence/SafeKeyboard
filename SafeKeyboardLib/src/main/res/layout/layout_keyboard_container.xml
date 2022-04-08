@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -65,7 +64,7 @@
         android:layout_marginTop="2sp"
         android:layout_marginBottom="10sp">
 
-        <com.safe.keyboard.SafeKeyboardView
+        <com.valence.safe.keyboard.SafeKeyboardView
             android:id="@+id/safeKeyboardLetter"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -77,10 +76,10 @@
             android:keyPreviewHeight="60dp"
             android:keyPreviewLayout="@layout/keyboard_preview_layout"
             android:keyPreviewOffset="0dp"
-            android:keyTextColor="@color/white"
-            app:enable_vibrate="false"
-            app:random_digit="false"
-            app:remember_last_type="true" />
+            android:keyTextColor="@color/white" />
+        <!--        app:enable_vibrate="false"-->
+        <!--        app:random_digit="false"-->
+        <!--        app:remember_last_type="true"-->
 
     </FrameLayout>
 </LinearLayout>

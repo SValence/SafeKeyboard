@@ -1,4 +1,4 @@
-package com.safe.keyboard;
+package com.valence.safe.keyboard;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.os.Vibrator;
-import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.InputType;
 import android.util.DisplayMetrics;
@@ -31,12 +30,16 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Administrator on 2018/3/7 0007.
@@ -45,25 +48,59 @@ import java.util.List;
 public class SafeKeyboard {
 
     private static final String TAG = "SafeKeyboard";
+    private static final SparseArray<String> letterBindArray;
+
+    static {
+        letterBindArray = new SparseArray<>();
+        letterBindArray.put(0, "a");
+        letterBindArray.put(1, "b");
+        letterBindArray.put(2, "c");
+        letterBindArray.put(3, "d");
+        letterBindArray.put(4, "e");
+        letterBindArray.put(5, "f");
+        letterBindArray.put(6, "g");
+        letterBindArray.put(7, "h");
+        letterBindArray.put(8, "i");
+        letterBindArray.put(9, "j");
+        letterBindArray.put(10, "k");
+        letterBindArray.put(11, "l");
+        letterBindArray.put(12, "m");
+        letterBindArray.put(13, "n");
+        letterBindArray.put(14, "o");
+        letterBindArray.put(15, "p");
+        letterBindArray.put(16, "q");
+        letterBindArray.put(17, "r");
+        letterBindArray.put(18, "s");
+        letterBindArray.put(19, "t");
+        letterBindArray.put(20, "u");
+        letterBindArray.put(21, "v");
+        letterBindArray.put(22, "w");
+        letterBindArray.put(23, "x");
+        letterBindArray.put(24, "y");
+        letterBindArray.put(25, "z");
+    }
 
     private Context mContext;               //上下文
 
     private LinearLayout keyboardParentView;
     private View keyContainer;              //自定义键盘的容器View
     private SafeKeyboardView keyboardView;  //键盘的View
-    private Keyboard keyboardNumber;        //数字键盘
-    private Keyboard keyboardNumberOnly;    //纯数字键盘
-    private Keyboard keyboardLetterOnly;    //字母键盘
-    private Keyboard keyboardLetterNum;     //字母数字键盘
+    private Keyboard keyboardNumber;        //数字键盘, 包含了基本的 + - * / . 等符号
+    private Keyboard keyboardNumberRandom;  //数字键盘, 包含了基本的 + - * / . 等符号  随机
+    private Keyboard keyboardNumberOnly;    //纯数字键盘, 只有数字
+    private Keyboard keyboardNumberOnlyRandom;//纯数字键盘, 只有数字  随机
     private Keyboard keyboardSymbol;        //符号键盘
     private Keyboard keyboardIdCard;        //中国身份证号码键盘
-    private Keyboard keyboardLetter;        //字母键盘总成
+    private Keyboard keyboardIdCardRandom;  //中国身份证号码键盘  随机
+    private Keyboard keyboardLetter;        //字母键盘总成, keyboardLetterOnly 和 keyboardLetterNum 初始化后, 赋值给此变量
+    private Keyboard keyboardLetterRandom;  //随机字母键盘总成, keyboardLetterOnly 和 keyboardLetterNum 初始化后, 赋值给此变量
+    private boolean isJustChangeLetterCase = false;
     private static boolean isCapes = false;
     private boolean isCapLock = false;
     private boolean isShowStart = false;
     private boolean isHideStart = false;
     private boolean forbidPreview = false;  // 关闭按键预览功能
-    private boolean letterWithNum;  // 字母键盘是否带有数字
+    private boolean letterWithNum;          // 字母键盘是否带有数字
     private int keyboardType = 1;           // SafeKeyboard 键盘类型
     private int mCurrentInputTypeInEdit;    // 当前 EditText 的输入类型, (其实这个参数比较鸡肋, 使用 mCurrentEditText 即可)
     private static final long HIDE_TIME = 300;
@@ -71,7 +108,7 @@ public class SafeKeyboard {
     private static final long HIDE_DELAY = 50;
     private static final long SHOW_TIME = 300;
     private static final long DELAY_TIME = 100;
-    private Handler safeHandler = new Handler(Looper.getMainLooper());
+    private final Handler safeHandler = new Handler(Looper.getMainLooper());
     private Drawable delDrawable;
     private Drawable lowDrawable;
     private Drawable upDrawable;
@@ -84,11 +121,14 @@ public class SafeKeyboard {
     private long lastTouchTime;
     private EditText mCurrentEditText;
     private SparseArray<Keyboard.Key> randomDigitKeys;
+    private SparseArray<Keyboard.Key> randomDigitNumOnlyKeys;
     private SparseArray<Keyboard.Key> randomIdCardDigitKeys;
+    private SparseArray<Keyboard.Key> randomLetterKeys;
     private SparseIntArray mEditLastKeyboardTypeArray;
 
     private HashMap<Integer, EditText> mEditMap;
     private HashMap<Integer, EditText> mIdCardEditMap;
+    private Set<Integer> mRandomEditIdSet;
     private View.OnTouchListener onEditTextTouchListener;
     private View rootView;
     private View mScrollLayout;
@@ -107,7 +147,29 @@ public class SafeKeyboard {
     // 已支持多 EditText 共用一个 SafeKeyboard
 
     /**
+     * SafeKeyboard 构造方法, 传入必要的参数, 已精简传入参数
+     * 使用 SafeKeyboard 布局为默认布局 layout_keyboard_container
+     *
+     * @param mContext           上下文Context
+     * @param keyboardParentView 界面上显示 SafeKeyboard 的 View
+     * @param rootView           含有使用了 SafeKeyboard 的 EditText 的界面根布局 View
+     *                           ( 多个 EditText 共用 SafeKeyboard 但其直接父布局不是同一个 View 时, 传入公共父布局)
+     * @param scrollLayout       目标 EditText 父布局 View
+     */
+    public SafeKeyboard(Context mContext, LinearLayout keyboardParentView, @NonNull View rootView, @NonNull View scrollLayout) {
+        this(mContext, keyboardParentView, R.layout.layout_keyboard_container, R.id.safeKeyboardLetter,
+                rootView, scrollLayout);
+    }
+
+    public SafeKeyboard(Context mContext, LinearLayout keyboardParentView, @NonNull View rootView, @NonNull View scrollLayout,
+                        boolean letterWithNum) {
+        this(mContext, keyboardParentView, R.layout.layout_keyboard_container, R.id.safeKeyboardLetter,
+                rootView, scrollLayout, letterWithNum);
+    }
+
+    /**
      * SafeKeyboard 构造方法, 传入必要的参数
+     * 可自定义安全软件盘的样式
      *
      * @param mContext            上下文Context
      * @param keyboardParentView  界面上显示 SafeKeyboard 的 View
@@ -117,16 +179,10 @@ public class SafeKeyboard {
      *                            ( 多个 EditText 共用 SafeKeyboard 但其直接父布局不是同一个 View 时, 传入公共父布局)
      * @param scrollLayout        目标 EditText 父布局 View
      */
-    SafeKeyboard(Context mContext, LinearLayout keyboardParentView, int keyboardLayoutResId, int mSafeKeyboardViewId,
-                 @NonNull View rootView, @NonNull View scrollLayout) {
+    public SafeKeyboard(Context mContext, LinearLayout keyboardParentView, int keyboardLayoutResId, int mSafeKeyboardViewId,
+                        @NonNull View rootView, @NonNull View scrollLayout) {
         this(mContext, keyboardParentView, keyboardLayoutResId, mSafeKeyboardViewId, rootView, scrollLayout,
-                false, false);
-    }
-
-    SafeKeyboard(Context mContext, LinearLayout keyboardParentView, int keyboardLayoutResId, int mSafeKeyboardViewId,
-                 @NonNull View rootView, @NonNull View scrollLayout, boolean isPackageByScrollView) {
-        this(mContext, keyboardParentView, keyboardLayoutResId, mSafeKeyboardViewId, rootView, scrollLayout,
-                false, isPackageByScrollView);
+                false);
     }
 
     /**
@@ -141,8 +197,8 @@ public class SafeKeyboard {
      *                            ( 多个 EditText 共用 SafeKeyboard 但其直接父布局不是同一个 View 时, 传入公共父布局)
      * @param letterWithNum       字母键盘是否带有数字
      */
-    SafeKeyboard(Context mContext, LinearLayout keyboardParentView, int keyboardLayoutResId, int mSafeKeyboardViewId,
-                 @NonNull View rootView, @NonNull View scrollLayout, boolean letterWithNum, boolean isPackageByScrollView) {
+    public SafeKeyboard(Context mContext, LinearLayout keyboardParentView, int keyboardLayoutResId, int mSafeKeyboardViewId,
+                        @NonNull View rootView, @NonNull View scrollLayout, boolean letterWithNum) {
         this.mContext = mContext;
         this.keyboardParentView = keyboardParentView;
         this.keyboardLayoutResId = keyboardLayoutResId;
@@ -156,8 +212,8 @@ public class SafeKeyboard {
         initAnimation();
     }
 
-    SafeKeyboard(Context mContext, LinearLayout keyboardParentView, int keyboardLayoutResId, int mSafeKeyboardViewId,
-                 Drawable del, Drawable low, Drawable up, Drawable upLock, @NonNull View rootView, @NonNull ViewGroup scrollLayout) {
+    public SafeKeyboard(Context mContext, LinearLayout keyboardParentView, int keyboardLayoutResId, int mSafeKeyboardViewId,
+                        Drawable del, Drawable low, Drawable up, Drawable upLock, @NonNull View rootView, @NonNull ViewGroup scrollLayout) {
         this.mContext = mContext;
         this.keyboardParentView = keyboardParentView;
         this.keyboardLayoutResId = keyboardLayoutResId;
@@ -187,6 +243,7 @@ public class SafeKeyboard {
         upPoint = new ViewPoint();
         mEditMap = new HashMap<>();
         mIdCardEditMap = new HashMap<>();
+        mRandomEditIdSet = new HashSet<>();
         mEditLastKeyboardTypeArray = new SparseIntArray();
         mVibrator = null;
         originalScrollPosInScr = new int[]{0, 0, 0, 0};
@@ -268,31 +325,41 @@ public class SafeKeyboard {
         keyContainer = LayoutInflater.from(mContext).inflate(keyboardLayoutResId, keyboardParentView, true);
         keyContainer.setVisibility(View.GONE);
         keyboardNumber = new Keyboard(mContext, R.xml.keyboard_num_symbol);     //实例化数字键盘
+        keyboardNumberRandom = new Keyboard(mContext, R.xml.keyboard_num_symbol);     //实例化数字键盘  随机
         // 注: 这里有三个数字键盘,  keyboard_num_symbol:带部分符号;   keyboard_num:可切换的数字键盘;    keyboard_num_only:纯数字键盘, 不可切换
         keyboardNumberOnly = new Keyboard(mContext, R.xml.keyboard_num_only);
+        keyboardNumberOnlyRandom = new Keyboard(mContext, R.xml.keyboard_num_only);
 
-        keyboardLetterOnly = new Keyboard(mContext, R.xml.keyboard_letter);         //实例化字母键盘
-        keyboardLetterNum = new Keyboard(mContext, R.xml.keyboard_letter_num);         //实例化字母键盘
+        //字母键盘, 只包含字母, 没有数字
+        Keyboard keyboardLetterOnly = new Keyboard(mContext, R.xml.keyboard_letter);            //实例化字母键盘
+        Keyboard keyboardLetterOnlyRandom = new Keyboard(mContext, R.xml.keyboard_letter);      //实例化字母键盘 随机
+        //字母数字键盘, 第一行为数字
+        Keyboard keyboardLetterNum = new Keyboard(mContext, R.xml.keyboard_letter_num);         //实例化字母键盘
+        Keyboard keyboardLetterNumRandom = new Keyboard(mContext, R.xml.keyboard_letter_num);   //实例化字母键盘 随机
         keyboardSymbol = new Keyboard(mContext, R.xml.keyboard_symbol);         //实例化符号键盘
         keyboardIdCard = new Keyboard(mContext, R.xml.keyboard_id_card_zn);     //实例化 IdCard(中国身份证) 键盘
+        keyboardIdCardRandom = new Keyboard(mContext, R.xml.keyboard_id_card_zn);     //实例化 IdCard(中国身份证) 键盘  随机
         // 由于符号键盘与字母键盘共用一个KeyBoardView, 所以不需要再为符号键盘单独实例化一个KeyBoardView
 
         keyboardLetter = letterWithNum ? keyboardLetterNum : keyboardLetterOnly;
+        keyboardLetterRandom = letterWithNum ? keyboardLetterNumRandom : keyboardLetterOnlyRandom;
 
         lastTouchTime = 0L;
 
         initRandomDigitKeys();
+        initRandomDigitNumOnlyKeys();
         initIdCardRandomDigitKeys();
+        initRandomLetterKeys();
 
         keyboardView = keyContainer.findViewById(mSafeKeyboardViewId);
         if (delDrawable == null)
-            delDrawable = mContext.getDrawable(R.drawable.icon_del);
+            delDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_del);
         if (lowDrawable == null)
-            lowDrawable = mContext.getDrawable(R.drawable.icon_capital_default);
+            lowDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_capital_default);
         if (upDrawable == null)
-            upDrawable = mContext.getDrawable(R.drawable.icon_capital_selected);
+            upDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_capital_selected);
         if (upDrawableLock == null)
-            upDrawableLock = mContext.getDrawable(R.drawable.icon_capital_selected_lock);
+            upDrawableLock = ContextCompat.getDrawable(mContext, R.drawable.icon_capital_selected_lock);
         keyboardView.setDelDrawable(delDrawable);
         keyboardView.setLowDrawable(lowDrawable);
         keyboardView.setUpDrawable(upDrawable);
@@ -464,22 +531,46 @@ public class SafeKeyboard {
 
     private void initRandomDigitKeys() {
         randomDigitKeys = new SparseArray<>();
-        List<Keyboard.Key> keys = keyboardNumber.getKeys();
+        List<Keyboard.Key> keys = keyboardNumberRandom.getKeys();
         for (Keyboard.Key key : keys) {
             int code = key.codes[0];
             if (code >= 48 && code <= 57)
                 randomDigitKeys.put(code, key);
         }
+        refreshDigitKeyboard(keyboardNumberRandom);
+    }
+
+    private void initRandomDigitNumOnlyKeys() {
+        randomDigitNumOnlyKeys = new SparseArray<>();
+        List<Keyboard.Key> keys = keyboardNumberOnlyRandom.getKeys();
+        for (Keyboard.Key key : keys) {
+            int code = key.codes[0];
+            if (code >= 48 && code <= 57)
+                randomDigitNumOnlyKeys.put(code, key);
+        }
+        refreshDigitKeyboard(keyboardNumberOnlyRandom);
     }
 
     private void initIdCardRandomDigitKeys() {
         randomIdCardDigitKeys = new SparseArray<>();
-        List<Keyboard.Key> keys = keyboardIdCard.getKeys();
+        List<Keyboard.Key> keys = keyboardIdCardRandom.getKeys();
         for (Keyboard.Key key : keys) {
             int code = key.codes[0];
             if (code >= 48 && code <= 57)
                 randomIdCardDigitKeys.put(code, key);
         }
+        refreshDigitKeyboard(keyboardIdCardRandom);
+    }
+
+    private void initRandomLetterKeys() {
+        randomLetterKeys = new SparseArray<>();
+        List<Keyboard.Key> keys = keyboardLetterRandom.getKeys();
+        for (Keyboard.Key key : keys) {
+            int code = key.codes[0];
+            if (code >= 97 && code <= 122)
+                randomLetterKeys.put(code, key);
+        }
+        refreshLowerLetterKeyboard(keyboardLetterRandom);
     }
 
     /**
@@ -512,8 +603,22 @@ public class SafeKeyboard {
     }
 
     public void putEditText2IdCardType(int id, EditText mEditText) {
+        putEditText(mEditText);
         if (mIdCardEditMap == null) mIdCardEditMap = new HashMap<>();
         mIdCardEditMap.put(id, mEditText);
+    }
+
+    public void putRandomEdit(EditText mEditText){
+        putEditText(mEditText);
+        putRandomEditTextId(mEditText.getId());
+    }
+
+    private void putRandomEditTextId(int id) {
+        if (mRandomEditIdSet == null) mRandomEditIdSet = new HashSet<>();
+        if (mRandomEditIdSet.contains(id)) {
+            Log.w(TAG, "This edit has been set to random already!!!");
+        }
+        mRandomEditIdSet.add(id);
     }
 
     /**
@@ -541,9 +646,10 @@ public class SafeKeyboard {
                 if (primaryCode == -1 || primaryCode == -5 || primaryCode == 32 || primaryCode == -2
                         || primaryCode == 100860 || primaryCode == 100861 || primaryCode == -35) {
                     keyboardView.setPreviewEnabled(false);
-                } else {
-                    keyboardView.setPreviewEnabled(!forbidPreview);
                 }
+                // else {
+                //     keyboardView.setPreviewEnabled(!forbidPreview);
+                // }
             }
         }
 
@@ -649,11 +755,14 @@ public class SafeKeyboard {
     private void refreshDigitKeyboard(Keyboard keyboard) {
         if (keyboard != null) {
             SparseArray<Keyboard.Key> randomKeys;
-            if (keyboard == keyboardIdCard) {
+            if (keyboard == keyboardIdCardRandom) {
                 // 如果是 IdCard 键盘
                 randomKeys = randomIdCardDigitKeys;
+            } else if (keyboard == keyboardNumberOnlyRandom) {
+                // 纯数字键盘
+                randomKeys = randomDigitNumOnlyKeys;
             } else {
-                // 否则认为是 数字 键盘
+                // 否则认为是 数字 键盘 带部分符号的
                 randomKeys = randomDigitKeys;
             }
             HashSet<Integer> set = new HashSet<>();
@@ -671,19 +780,61 @@ public class SafeKeyboard {
         }
     }
 
+    private void refreshLowerLetterKeyboard(Keyboard keyboard) {
+        if (isJustChangeLetterCase) {
+            // 如果是因为切换大小写运行到这里, 那么就直接返回, 不再随机一次
+            isJustChangeLetterCase = false;
+            return;
+        }
+        if (keyboard == keyboardLetterRandom) {
+            SparseArray<Keyboard.Key> randomKeys;
+            randomKeys = randomLetterKeys;
+            HashSet<Integer> set = new HashSet<>();
+            int aCode = 97;
+            while (set.size() < 26) {
+                int num = (int) (Math.random() * 26);
+                if (set.add(num)) {
+                    // set.size() - 1 表示目前是第几个数字按键
+                    Keyboard.Key key = randomKeys.get(set.size() - 1 + aCode);
+                    key.label = (isCapLock || isCapes) ? letterBindArray.get(num).toUpperCase() : letterBindArray.get(num);
+                    key.codes[0] = aCode + num;
+                }
+            }
+        } else {
+            Log.w(TAG, "Refresh Digit ERROR! Keyboard is null");
+        }
+    }
+
     private void switchKeyboard() {
+        boolean isKeyboardRandom = mRandomEditIdSet != null && !mRandomEditIdSet.isEmpty() &&
+                mRandomEditIdSet.contains(mCurrentEditText.getId());
         switch (keyboardType) {
             case 1:
-                setKeyboard(keyboardLetter);
+                if (isKeyboardRandom) {
+                    refreshLowerLetterKeyboard(keyboardLetterRandom);
+                }
+                setKeyboard(isKeyboardRandom ? keyboardLetterRandom : keyboardLetter);
                 break;
             case 2:
                 setKeyboard(keyboardSymbol);
                 break;
             case 3:
-                if (keyboardView.isRandomDigit()) {
-                    refreshDigitKeyboard(keyboardNumber);
+                if (isKeyboardRandom) {
+                    refreshDigitKeyboard(keyboardNumberRandom);
                 }
-                setKeyboard(keyboardNumber);
+                setKeyboard(isKeyboardRandom ? keyboardNumberRandom : keyboardNumber);
+                break;
+            case 4:
+                if (isKeyboardRandom) {
+                    refreshDigitKeyboard(keyboardNumberOnlyRandom);
+                }
+                setKeyboard(isKeyboardRandom ? keyboardNumberOnlyRandom : keyboardNumberOnly);
+                break;
+            case 5:
+                if (isKeyboardRandom) {
+                    refreshDigitKeyboard(keyboardIdCardRandom);
+                }
+                setKeyboard(isKeyboardRandom ? keyboardIdCardRandom : keyboardIdCard);
                 break;
             default:
                 Log.e(TAG, "ERROR keyboard type");
@@ -691,15 +842,28 @@ public class SafeKeyboard {
         }
     }
 
+    /**
+     * 输入类型分类
+     * 1. 字母键盘
+     * 2. 符号键盘
+     * 3. 数字键盘
+     * 4. 纯数字键盘
+     * 5. 中国身份证键盘
+     *
+     * @param keyboard 键盘
+     */
     private void setKeyboard(Keyboard keyboard) {
         int type;
-        if (keyboard == keyboardLetter) {
+        if (keyboard == keyboardLetter || keyboard == keyboardLetterRandom) {
             type = 1;
         } else if (keyboard == keyboardSymbol) {
             type = 2;
-        } else if (keyboard == keyboardNumber || keyboard == keyboardNumberOnly || keyboard == keyboardIdCard
-            /*|| mEditIsNumInput(mCurrentEditText)*/) {
+        } else if (keyboard == keyboardNumber || keyboard == keyboardNumberRandom) {
             type = 3;
+        } else if (keyboard == keyboardNumberOnly || keyboard == keyboardNumberOnlyRandom) {
+            type = 4;
+        } else if (keyboard == keyboardIdCard || keyboard == keyboardIdCardRandom) {
+            type = 5;
         } else type = 1;
         mEditLastKeyboardTypeArray.put(mCurrentEditText.getId(), type);
         keyboardType = type;
@@ -728,6 +892,7 @@ public class SafeKeyboard {
         }
         keyboardView.setCap(isCapes);
         keyboardView.setCapLock(isCapLock);
+        isJustChangeLetterCase = true;
     }
 
     private void toLowerCase() {
@@ -848,10 +1013,15 @@ public class SafeKeyboard {
 
     private void showKeyboard() {
         Keyboard mKeyboard = getKeyboardByInputType();
-        if (mKeyboard != null && (mKeyboard == keyboardNumber || mKeyboard == keyboardIdCard
-                || mKeyboard == keyboardNumberOnly) && keyboardView.isRandomDigit()) {
+        boolean isKeyboardRandom = mRandomEditIdSet != null && !mRandomEditIdSet.isEmpty() &&
+                mRandomEditIdSet.contains(mCurrentEditText.getId());
+        if (mKeyboard != null && (mKeyboard == keyboardNumberRandom || mKeyboard == keyboardIdCardRandom
+                || mKeyboard == keyboardNumberOnlyRandom) && isKeyboardRandom) {
             refreshDigitKeyboard(mKeyboard);
+        } else if (mKeyboard != null && mKeyboard == keyboardLetterRandom && isKeyboardRandom) {
+            refreshLowerLetterKeyboard(keyboardLetterRandom);
         }
+
         setKeyboard(mKeyboard == null ? keyboardLetter : mKeyboard);
         keyContainer.setVisibility(View.VISIBLE);
         keyContainer.clearAnimation();
@@ -881,23 +1051,25 @@ public class SafeKeyboard {
     }
 
     private Keyboard getKeyboardByInputType() {
-        Keyboard lastKeyboard = keyboardLetter; // 默认字母键盘
+        boolean isKeyboardRandom = mRandomEditIdSet != null && !mRandomEditIdSet.isEmpty() &&
+                mRandomEditIdSet.contains(mCurrentEditText.getId());
+        Keyboard lastKeyboard = isKeyboardRandom ? keyboardLetterRandom : keyboardLetter; // 默认字母键盘
 
         if (mCurrentInputTypeInEdit == InputType.TYPE_CLASS_NUMBER) {
-            lastKeyboard = keyboardNumberOnly;
+            lastKeyboard = isKeyboardRandom ? keyboardNumberOnlyRandom : keyboardNumberOnly;
         } else if (mIdCardEditMap.get(mCurrentEditText.getId()) != null) {
-            lastKeyboard = keyboardIdCard;
+            lastKeyboard = isKeyboardRandom ? keyboardIdCardRandom : keyboardIdCard;
         } else if (keyboardView.isRememberLastType()) {
             int type = mEditLastKeyboardTypeArray.get(mCurrentEditText.getId(), 1);
             switch (type) {
                 case 1:
-                    lastKeyboard = keyboardLetter;
+                    lastKeyboard = isKeyboardRandom ? keyboardLetterRandom : keyboardLetter;
                     break;
                 case 2:
                     lastKeyboard = keyboardSymbol;
                     break;
                 case 3:
-                    lastKeyboard = keyboardNumber;
+                    lastKeyboard = isKeyboardRandom ? keyboardNumberRandom : keyboardNumber;
                     break;
                 default:
                     Log.e(TAG, "ERROR keyboard type");
@@ -1037,6 +1209,10 @@ public class SafeKeyboard {
         if (mIdCardEditMap != null) {
             mIdCardEditMap.clear();
             mIdCardEditMap = null;
+        }
+        if (mRandomEditIdSet != null) {
+            mRandomEditIdSet.clear();
+            mRandomEditIdSet = null;
         }
         mVibrator = null;
     }

@@ -1,5 +1,6 @@
-package com.safe.keyboard;
+package com.valence.safe.keyboard;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -10,8 +11,10 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -24,7 +27,7 @@ public class SafeKeyboardView extends KeyboardView {
 
     private static final String TAG = "SafeKeyboardView";
 
-    private Context mContext;
+    private final Context mContext;
     private boolean isCap;
     private boolean isCapLock;
     private boolean enableVibrate;
@@ -39,13 +42,10 @@ public class SafeKeyboardView extends KeyboardView {
     private static final int ICON2KEY = 2;
 
     // 键盘的一些自定义属性
-    private boolean randomDigit;    // 数字随机
-    private final static boolean DIGIT_RANDOM = false;
-    //    private boolean onlyIdCard;     // 仅显示 身份证 键盘
-//    private final static boolean ONLY_ID_CARD = false;
-    private boolean rememberLastType;     // 仅显示 身份证 键盘
-    private final static boolean REM_LAST_TYPE = true;
-    private final static boolean DEFAULT_ENABLE_VIBRATE = false;
+    private boolean rememberLastType;
+    // private final static boolean DIGIT_RANDOM = false;
+    // private final static boolean REM_LAST_TYPE = true;
+    // private final static boolean DEFAULT_ENABLE_VIBRATE = false;
 
     public SafeKeyboardView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -66,36 +66,28 @@ public class SafeKeyboardView extends KeyboardView {
     private void initAttrs(Context context, AttributeSet attrs, int defStyleAttr) {
         if (attrs != null) {
             TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.SafeKeyboardView, defStyleAttr, 0);
-            randomDigit = array.getBoolean(R.styleable.SafeKeyboardView_random_digit, DIGIT_RANDOM);
+            // randomDigit = array.getBoolean(R.styleable.SafeKeyboardView_random_digit, DIGIT_RANDOM);
             // onlyIdCard = array.getBoolean(R.styleable.SafeKeyboardView_only_id_card, ONLY_ID_CARD);
-            rememberLastType = array.getBoolean(R.styleable.SafeKeyboardView_remember_last_type, REM_LAST_TYPE);
-            enableVibrate = array.getBoolean(R.styleable.SafeKeyboardView_enable_vibrate, DEFAULT_ENABLE_VIBRATE);
+            // rememberLastType = array.getBoolean(R.styleable.SafeKeyboardView_remember_last_type, REM_LAST_TYPE);
+            // enableVibrate = array.getBoolean(R.styleable.SafeKeyboardView_enable_vibrate, DEFAULT_ENABLE_VIBRATE);
             array.recycle();
         }
+    }
+
+    private void init(Context mContext) {
+        this.isCap = false;
+        this.isCapLock = false;
+        // 默认三种图标
+        this.delDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_del);
+        this.lowDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_capital_default);
+        this.upDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_capital_selected);
+        this.upDrawableLock = ContextCompat.getDrawable(mContext, R.drawable.icon_capital_selected_lock);
+        this.lastKeyboard = null;
     }
 
     public void setRememberLastType(boolean remember) {
         rememberLastType = remember;
     }
-
-    private void init(Context context) {
-        this.isCap = false;
-        this.isCapLock = false;
-        // 默认三种图标
-        this.delDrawable = context.getDrawable(R.drawable.icon_del);
-        this.lowDrawable = context.getDrawable(R.drawable.icon_capital_default);
-        this.upDrawable = context.getDrawable(R.drawable.icon_capital_selected);
-        this.upDrawableLock = context.getDrawable(R.drawable.icon_capital_selected_lock);
-        this.lastKeyboard = null;
-    }
-
-    public boolean isRandomDigit() {
-        return randomDigit;
-    }
-
-//    public boolean isOnlyIdCard() {
-//        return onlyIdCard;
-//    }
 
     public boolean isRememberLastType() {
         return rememberLastType;
@@ -156,6 +148,7 @@ public class SafeKeyboardView extends KeyboardView {
     }
 
     private void drawKeyBackground(int id, Canvas canvas, Keyboard.Key key) {
+        @SuppressLint("UseCompatLoadingForDrawables")
         Drawable drawable = mContext.getResources().getDrawable(id);
         int[] state = key.getCurrentDrawableState();
         if (key.codes[0] != 0) {
@@ -183,7 +176,8 @@ public class SafeKeyboardView extends KeyboardView {
                     try {
                         field = KeyboardView.class.getDeclaredField(getContext().getString(R.string.mLabelTextSize));
                         field.setAccessible(true);
-                        labelTextSize = (int) field.get(this);
+                        Object obj = field.get(this);
+                        labelTextSize = obj == null ? 0 : (int) obj;
                     } catch (NoSuchFieldException | IllegalAccessException e) {
                         e.printStackTrace();
                     }
@@ -194,7 +188,8 @@ public class SafeKeyboardView extends KeyboardView {
                     try {
                         field = KeyboardView.class.getDeclaredField(getContext().getString(R.string.mLabelTextSize));
                         field.setAccessible(true);
-                        keyTextSize = (int) field.get(this);
+                        Object obj = field.get(this);
+                        keyTextSize = obj == null ? 0 : (int) obj;
                     } catch (NoSuchFieldException | IllegalAccessException e) {
                         e.printStackTrace();
                     }

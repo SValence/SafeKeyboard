@@ -1,10 +1,7 @@
-package com.safe.keyboard;
+package com.valence.safe.keyboard;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +9,12 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
+
+import java.util.Objects;
 
 public class SafeKeyboardDialogFragment extends DialogFragment {
 
@@ -54,7 +57,7 @@ public class SafeKeyboardDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return new Dialog(getActivity(), getTheme()) {
+        return new Dialog(Objects.requireNonNull(getContext()), getTheme()) {
             @Override
             public void dismiss() {
                 if (ignoreCondition) {
@@ -86,12 +89,12 @@ public class SafeKeyboardDialogFragment extends DialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.layout_dialog_fragment, container, false);
-        keyboardContainer = view.findViewById(R.id.keyboardPlace);
+        keyboardContainer = view.findViewById(R.id.safe_keyboard_place);
         rootView = view.findViewById(R.id.dialog_fragment_root);
-        mScrollLayout = view.findViewById(R.id.dialog_scroll_layout);
-        safeEdit = view.findViewById(R.id.safeEditText5);
-        confirm = view.findViewById(R.id.dialog_fragment_confirm);
-        cancel = view.findViewById(R.id.dialog_fragment_cancel);
+        mScrollLayout = view.findViewById(R.id.safe_keyboard_dialog_scroll_layout);
+        safeEdit = view.findViewById(R.id.safe_keyboard_safe_edit);
+        confirm = view.findViewById(R.id.safe_keyboard_dialog_confirm);
+        cancel = view.findViewById(R.id.safe_keyboard_dialog_cancel);
         setListeners();
         return view;
     }
@@ -120,11 +123,10 @@ public class SafeKeyboardDialogFragment extends DialogFragment {
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         boolean useSafeKeyboard = getArguments().getBoolean("use_safe");
         if (useSafeKeyboard) {
-            safeKeyboard = new SafeKeyboard(view.getContext(), keyboardContainer, R.layout.layout_keyboard_containor,
-                    R.id.safeKeyboardLetter, rootView, mScrollLayout);
+            safeKeyboard = new SafeKeyboard(view.getContext(), keyboardContainer, rootView, mScrollLayout);
             safeKeyboard.putEditText(safeEdit);
         }
         super.onViewCreated(view, savedInstanceState);

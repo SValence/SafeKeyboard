@@ -51,9 +51,10 @@
                 android:inputType="none" />
 
             <EditText
+                android:id="@+id/safeEdit6"
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
-                android:hint="EditText 06"
+                android:hint="@string/safe_keyboard"
                 android:inputType="none" />
 
             <EditText
@@ -79,7 +80,7 @@
     </ScrollView>
 
     <LinearLayout
-        android:id="@+id/keyboardPlace"
+        android:id="@+id/safe_keyboard_place"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

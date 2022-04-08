@@ -1,14 +1,18 @@
 package com.safe.keyboard;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.valence.safe.keyboard.SafeKeyboard;
+
 public class ScrollViewEditActivity extends AppCompatActivity {
 
     private SafeKeyboard safeKeyboard;
+    private EditText safeEdit6;
     private EditText safeEdit8;
 
     @Override
@@ -20,13 +24,14 @@ public class ScrollViewEditActivity extends AppCompatActivity {
         EditText safeEdit = findViewById(R.id.safeEdit);
         EditText safeEdit2 = findViewById(R.id.safeEdit2);
         safeEdit8 = findViewById(R.id.safeEdit8);
-        LinearLayout keyboardContainer = findViewById(R.id.keyboardPlace);
+        safeEdit6 = findViewById(R.id.safeEdit6);
+        LinearLayout keyboardContainer = findViewById(R.id.safe_keyboard_place);
         View rootView = findViewById(R.id.scrollRoot);
         View scrollLayout = findViewById(R.id.scrollViewScrollLayout);
-        safeKeyboard = new SafeKeyboard(getApplicationContext(), keyboardContainer,
-                R.layout.layout_keyboard_containor, R.id.safeKeyboardLetter, rootView, scrollLayout, false);
+        safeKeyboard = new SafeKeyboard(getApplicationContext(), keyboardContainer, rootView, scrollLayout, false);
         safeKeyboard.putEditText(safeEdit);
         safeKeyboard.putEditText(safeEdit2);
+        safeKeyboard.putEditText(safeEdit6);
         safeKeyboard.putEditText(safeEdit8);
     }
 

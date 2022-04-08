@@ -1,9 +1,12 @@
 package com.safe.keyboard;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CheckBox;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.valence.safe.keyboard.SafeKeyboardDialogFragment;
 
 public class DialogSafeKeyboardActivity extends AppCompatActivity implements SafeKeyboardDialogFragment.onDialogResult {
 

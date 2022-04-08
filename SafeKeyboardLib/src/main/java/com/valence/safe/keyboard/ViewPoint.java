@@ -1,4 +1,4 @@
-package com.safe.keyboard;
+package com.valence.safe.keyboard;
 
 /**
  * @author Valence
