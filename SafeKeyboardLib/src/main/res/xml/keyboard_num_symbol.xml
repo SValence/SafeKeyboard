@@ -21,9 +21,9 @@
             android:codes="51"
             android:keyLabel="3" />
         <Key
-            android:codes="64"
-            android:keyWidth="14.6%p"
-            android:keyLabel="@string/keyboard_key1" />
+            android:codes="-5"
+            android:isRepeatable="true"
+            android:keyWidth="14.6%p" />
     </Row>
 
     <Row>
@@ -42,6 +42,27 @@
             android:codes="54"
             android:keyLabel="6" />
         <Key
+            android:codes="64"
+            android:keyWidth="14.6%p"
+            android:keyLabel="@string/keyboard_key1" />
+    </Row>
+
+    <Row>
+        <Key
+            android:codes="42"
+            android:horizontalGap="1%p"
+            android:keyWidth="14.6%p"
+            android:keyLabel="*" />
+        <Key
+            android:codes="55"
+            android:keyLabel="7" />
+        <Key
+            android:codes="56"
+            android:keyLabel="8" />
+        <Key
+            android:codes="57"
+            android:keyLabel="9" />
+        <Key
             android:codes="95"
             android:keyWidth="14.6%p"
             android:keyLabel="_" />
@@ -54,27 +75,6 @@
             android:keyWidth="14.6%p"
             android:keyLabel="/" />
         <Key
-            android:codes="55"
-            android:keyLabel="7" />
-        <Key
-            android:codes="56"
-            android:keyLabel="8" />
-        <Key
-            android:codes="57"
-            android:keyLabel="9" />
-        <Key
-            android:codes="42"
-            android:keyWidth="14.6%p"
-            android:keyLabel="*" />
-    </Row>
-
-    <Row>
-        <Key
-            android:codes="-2"
-            android:horizontalGap="1%p"
-            android:keyWidth="14.6%p"
-            android:keyLabel="ABC" />
-        <Key
             android:codes="32"
             android:isRepeatable="false"
             android:keyLabel="space" />
@@ -85,8 +85,8 @@
             android:codes="46"
             android:keyLabel="." />
         <Key
-            android:codes="-5"
-            android:isRepeatable="true"
-            android:keyWidth="14.6%p" />
+            android:codes="-2"
+            android:keyWidth="14.6%p"
+            android:keyLabel="ABC" />
     </Row>
 </Keyboard>

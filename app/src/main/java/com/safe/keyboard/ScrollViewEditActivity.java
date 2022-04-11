@@ -28,7 +28,7 @@ public class ScrollViewEditActivity extends AppCompatActivity {
         LinearLayout keyboardContainer = findViewById(R.id.safe_keyboard_place);
         View rootView = findViewById(R.id.scrollRoot);
         View scrollLayout = findViewById(R.id.scrollViewScrollLayout);
-        safeKeyboard = new SafeKeyboard(getApplicationContext(), keyboardContainer, rootView, scrollLayout, false);
+        safeKeyboard = new SafeKeyboard(getApplicationContext(), keyboardContainer, rootView, scrollLayout);
         safeKeyboard.putEditText(safeEdit);
         safeKeyboard.putEditText(safeEdit2);
         safeKeyboard.putEditText(safeEdit6);

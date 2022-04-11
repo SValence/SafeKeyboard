@@ -23,4 +23,5 @@
     <string name="cancel">取消</string>
     <string name="scroll_view_test">Scroll View Test</string>
     <string name="good_good">Good Good Study</string>
+    <string name="key_bg">bg</string>
 </resources>

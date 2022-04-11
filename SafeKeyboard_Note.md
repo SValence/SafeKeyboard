@@ -53,7 +53,7 @@ android.view.WindowManager$BadTokenException: Unable to add window -- token andr
 
 #### 2. 无法监听返回键问题
 
-* 如果你需要点击返回键的时候先隐藏 `SafeKeyboard` 软键盘, 再次点击返回时突出 `PopupWindow` 界面
+* 如果你需要点击返回键的时候先隐藏 `SafeKeyboard` 软键盘, 再次点击返回时退出 `PopupWindow` 界面
 
 * 那么适配过程中会发现无论是在 `PopupWindow` 还是在 `Fragment` 亦或是 `Activity` 中, 都无法监听到返回键的操作事件
 
@@ -90,13 +90,13 @@ android.view.WindowManager$BadTokenException: Unable to add window -- token andr
 
 `AlertDialog` 显示时是显示在所有 `View` 的上层, 所以无法对 `SafeKeyboard` 进行操作. 这里提供的解决方案为 : 使用 `DialogFraagment` , 在 `DialogFragment` 中的自定义布局文件中 : 
 
-* 1. 重新实现一个类似于 `AlertDialog` 的布局, 使 `SafeKeyboard` 有位置可以显示并操作 .
+* 1 . 重新实现一个类似于 `AlertDialog` 的布局, 使 `SafeKeyboard` 有位置可以显示并操作 .
   <br>样式图如下 : ( 详见 : `layout_dialog_fragment.xml` )
   <br><br>
   ![image](explain_files/SafeKeyboard_DialogFragment_View.png)
   <br><br>
 
-* 2. 在 1 中完成布局后, 显示的 `DialogFragment` 不是全屏显示的, 那么就需要手动调整 . 
+* 2 . 在 1 中完成布局后, 显示的 `DialogFragment` 不是全屏显示的, 那么就需要手动调整 . 
   <br><br> ① 代码操作 : 
   ```java
         // 使 Dialog 全屏显示的代码
@@ -125,7 +125,7 @@ android.view.WindowManager$BadTokenException: Unable to add window -- token andr
     </style>
   ```
 
-* 3. 同样的, 我们会遇到和 `PopupWindow` 相同的返回键事件问题, 那么为了解决这个问题, 我们需要重写 `Dialog` 中的 `dismiss()` 方法
+* 3 . 同样的, 我们会遇到和 `PopupWindow` 相同的返回键事件问题, 那么为了解决这个问题, 我们需要重写 `Dialog` 中的 `dismiss()` 方法
   <br> 这就又会出现另一个问题, 没有 `Dialog` 对象 ; 
   <br> 查看代码后发现, 创建 `Dialog` 对象的代码仅有一处, 而且非常简单 : 
   ```java
@@ -160,7 +160,7 @@ android.view.WindowManager$BadTokenException: Unable to add window -- token andr
     }
   ```
 
-* 4. 效果图
+* 4 . 效果图
 <br><br>
 ![image](explain_files/SafeKeyboard_in_Dialog.gif)
 

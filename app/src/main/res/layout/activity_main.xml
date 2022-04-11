@@ -126,6 +126,14 @@
                 android:layout_marginEnd="10sp"
                 android:hint="@string/keyboard_system" />
 
+            <EditText
+                android:id="@+id/safeEditText6"
+                android:layout_width="match_parent"
+                android:layout_height="50sp"
+                android:layout_marginStart="10sp"
+                android:layout_marginEnd="10sp"
+                android:hint="@string/keyboard_demo_new" />
+
         </LinearLayout>
     </ScrollView>
 

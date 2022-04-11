@@ -16,4 +16,10 @@
     <color name="keyboardPress">#1296db</color>
     <color name="colorRed">#FF0000</color>
     <color name="deepDarkTransparent">#99222222</color>
+
+
+
+    <color name="keyboardNormalTrans">#8a1c69ac</color>
+    <color name="keyboardPressTrans">#aa1296db</color>
+    <color name="keyboardKeyBackTrans">#aa474749</color>
 </resources>

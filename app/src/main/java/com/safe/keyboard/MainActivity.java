@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatEditText;
 
 import com.valence.safe.keyboard.SafeKeyboard;
+import com.valence.safe.keyboard.SafeKeyboardConfig;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,22 +26,27 @@ public class MainActivity extends AppCompatActivity {
         EditText safeEdit3 = findViewById(R.id.safeEditText3);
         EditText safeEdit4 = findViewById(R.id.safeEditText4);
         EditText safeEdit5 = findViewById(R.id.safe_keyboard_safe_edit);
+        EditText safeEdit6 = findViewById(R.id.safeEditText6);
         AppCompatEditText appCompatEditText = findViewById(R.id.safeAppCompactEditText);
         View rootView = findViewById(R.id.main_root);
         View scrollLayout = findViewById(R.id.scroll_layout);
         LinearLayout keyboardContainer = findViewById(R.id.safe_keyboard_place);
-        safeKeyboard = new SafeKeyboard(getApplicationContext(), keyboardContainer, rootView, scrollLayout);
+        SafeKeyboardConfig config = SafeKeyboardConfig.getDefaultConfig();
+        config.keyboardTitle = "SValence智能安全软键盘";
+        config.keyboardNumOnlyKeyNoneTitle = "StandByMe2";
+        // config.keyboardDoneImgResId = R.drawable.keyboard_done_blue;
+        // config.keyboardBgResId = R.drawable.keyboard_arcu_bg;
+        // config.iconResIdDel = R.drawable.icon_delete;
+        safeKeyboard = new SafeKeyboard(getApplicationContext(), keyboardContainer, rootView, scrollLayout, config);
         safeKeyboard.putEditText(safeEdit);
         safeKeyboard.putRandomEdit(safeEdit2);
         safeKeyboard.putRandomEdit(safeEdit3);
-        safeKeyboard.putEditText(safeEdit4);
+        safeKeyboard.putVibrateEdit(safeEdit4);
+        safeKeyboard.putEditText(safeEdit6);
         safeKeyboard.putRandomEdit(safeEdit5);
         safeKeyboard.putEditText(appCompatEditText);
         safeKeyboard.putEditText2IdCardType(safeEdit3.getId(), safeEdit3);
         safeKeyboard.setForbidPreview(true);
-//        safeKeyboard.setDelDrawable(this.getResources().getDrawable(R.drawable.icon_del));
-//        safeKeyboard.setLowDrawable(this.getResources().getDrawable(R.drawable.icon_capital_default));
-//        safeKeyboard.setUpDrawable(this.getResources().getDrawable(R.drawable.icon_capital_selected));
 
         initView();
     }

@@ -27,6 +27,8 @@ public class SafeKeyboardView extends KeyboardView {
 
     private static final String TAG = "SafeKeyboardView";
 
+    private int specialKeyBgResId = R.drawable.keyboard_change_trans;
+
     private final Context mContext;
     private boolean isCap;
     private boolean isCapLock;
@@ -43,9 +45,6 @@ public class SafeKeyboardView extends KeyboardView {
 
     // 键盘的一些自定义属性
     private boolean rememberLastType;
-    // private final static boolean DIGIT_RANDOM = false;
-    // private final static boolean REM_LAST_TYPE = true;
-    // private final static boolean DEFAULT_ENABLE_VIBRATE = false;
 
     public SafeKeyboardView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -78,10 +77,18 @@ public class SafeKeyboardView extends KeyboardView {
         this.isCap = false;
         this.isCapLock = false;
         // 默认三种图标
-        this.delDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_del);
-        this.lowDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_capital_default);
-        this.upDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_capital_selected);
-        this.upDrawableLock = ContextCompat.getDrawable(mContext, R.drawable.icon_capital_selected_lock);
+        if (delDrawable == null) {
+            delDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_del);
+        }
+        if (lowDrawable == null) {
+            lowDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_capital_default);
+        }
+        if (upDrawable == null) {
+            upDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_capital_selected);
+        }
+        if (upDrawableLock == null) {
+            upDrawableLock = ContextCompat.getDrawable(mContext, R.drawable.icon_capital_selected_lock);
+        }
         this.lastKeyboard = null;
     }
 
@@ -128,20 +135,20 @@ public class SafeKeyboardView extends KeyboardView {
     private void drawSpecialKey(Canvas canvas, Keyboard.Key key) {
         int color = Color.WHITE;
         if (key.codes[0] == -5) {
-            drawKeyBackground(R.drawable.keyboard_change, canvas, key);
+            drawKeyBackground(specialKeyBgResId, canvas, key);
             drawTextAndIcon(canvas, key, delDrawable, color);
         } else if (key.codes[0] == -2 || key.codes[0] == 100860 || key.codes[0] == 100861) {
-            drawKeyBackground(R.drawable.keyboard_change, canvas, key);
+            drawKeyBackground(specialKeyBgResId, canvas, key);
             drawTextAndIcon(canvas, key, null, color);
         } else if (key.codes[0] == -1) {
             if (isCapLock) {
-                drawKeyBackground(R.drawable.keyboard_change, canvas, key);
+                drawKeyBackground(specialKeyBgResId, canvas, key);
                 drawTextAndIcon(canvas, key, upDrawableLock, color);
             } else if (isCap) {
-                drawKeyBackground(R.drawable.keyboard_change, canvas, key);
+                drawKeyBackground(specialKeyBgResId, canvas, key);
                 drawTextAndIcon(canvas, key, upDrawable, color);
             } else {
-                drawKeyBackground(R.drawable.keyboard_change, canvas, key);
+                drawKeyBackground(specialKeyBgResId, canvas, key);
                 drawTextAndIcon(canvas, key, lowDrawable, color);
             }
         }
@@ -267,6 +274,10 @@ public class SafeKeyboardView extends KeyboardView {
 
     public void setUpDrawableLock(Drawable upDrawableLock) {
         this.upDrawableLock = upDrawableLock;
+    }
+
+    public void setSpecialKeyBgResId(int specialKeyBgResId) {
+        this.specialKeyBgResId = specialKeyBgResId;
     }
 
     public static int px2dip(Context context, float pxValue) {

@@ -202,90 +202,111 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="280dp"
     android:background="@color/keyboardBackColor"
-    android:orientation="vertical">
+    android:clickable="true"
+    android:focusable="true">
 
-    <RelativeLayout
-        android:id="@+id/keyboardHeader"
+    <ImageView
+        android:id="@+id/keyboardBgImg"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/keyboard_tip_height"
-        android:background="@color/keyboardBackColor">
+        android:layout_height="match_parent"
+        android:contentDescription="@string/key_bg"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="@id/keyboardContainerRoot"
+        app:layout_constraintLeft_toLeftOf="@id/keyboardContainerRoot"
+        app:layout_constraintRight_toRightOf="@id/keyboardContainerRoot"
+        app:layout_constraintTop_toTopOf="@id/keyboardContainerRoot" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_centerInParent="true"
-            android:orientation="horizontal"
-            tools:ignore="RelativeOverlap,UseCompoundDrawables">
+    <LinearLayout
+        android:id="@+id/keyboardContainerRoot"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/transparent"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-            <ImageView
-                android:layout_width="25sp"
-                android:layout_height="25sp"
-                android:layout_gravity="center_vertical"
-                android:contentDescription="@string/description"
-                android:src="@drawable/shield" />
+        <RelativeLayout
+            android:id="@+id/keyboardHeader"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/keyboard_tip_height"
+            android:background="@color/transparent">
 
-            <TextView
-                android:id="@+id/keyboardTip"
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="@string/safe_keyboard"
-                android:textColor="@color/lightGray"
-                android:textSize="16sp" />
-        </LinearLayout>
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+                android:orientation="horizontal"
+                tools:ignore="RelativeOverlap,UseCompoundDrawables">
+
+                <ImageView
+                    android:id="@+id/keyboardImg"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_gravity="center_vertical"
+                    android:contentDescription="@string/description"
+                    android:src="@drawable/shield" />
+
+                <TextView
+                    android:id="@+id/keyboardTip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/safe_keyboard"
+                    android:textColor="@color/lightGray"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/keyboardDone"
+                android:layout_width="60dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/bg_keyboard_done_layout_trans">
+
+                <ImageView
+                    android:id="@+id/keyboardDoneImg"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/keyboard_done_img"
+                    android:textColor="@color/white"
+                    android:textSize="16sp" />
+            </FrameLayout>
+
+        </RelativeLayout>
 
         <FrameLayout
-            android:id="@+id/keyboardDone"
-            android:layout_width="60sp"
-            android:layout_height="match_parent"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:background="@drawable/bg_keyboard_done">
-
-            <ImageView
-                android:layout_width="30sp"
-                android:layout_height="30sp"
-                android:layout_gravity="center"
-                android:contentDescription="@null"
-                android:scaleType="centerInside"
-                android:src="@drawable/keyboard_done_"
-                android:textColor="@color/white"
-                android:textSize="16sp" />
-        </FrameLayout>
-
-    </RelativeLayout>
-
-    <FrameLayout
-        android:id="@+id/keyboardLayer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2sp"
-        android:layout_marginBottom="10sp">
-
-        <com.valence.safe.keyboard.SafeKeyboardView
-            android:id="@+id/safeKeyboardLetter"
+            android:id="@+id/keyboardLayer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:animateLayoutChanges="true"
-            android:background="@color/keyboardBackColor"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:keyBackground="@drawable/keyboard_press_bg"
-            android:keyPreviewHeight="60dp"
-            android:keyPreviewLayout="@layout/keyboard_preview_layout"
-            android:keyPreviewOffset="0dp"
-            android:keyTextColor="@color/white"
-            app:random_digit="false"
-            app:remember_last_type="true" />
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="10dp">
 
-    </FrameLayout>
-</LinearLayout>
+            <com.valence.safe.keyboard.SafeKeyboardView
+                android:id="@+id/safeKeyboardViewId"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:animateLayoutChanges="true"
+                android:background="@color/transparent"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:keyBackground="@drawable/keyboard_press_bg_trans"
+                android:keyPreviewHeight="60dp"
+                android:keyPreviewLayout="@layout/keyboard_preview_layout"
+                android:keyPreviewOffset="0dp"
+                android:keyTextColor="@color/white" />
+
+        </FrameLayout>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
 ```
 
 #### 3.1 `com.valence.safe.keyboard.SafeKeyboardView` 中的属性值得关注的有:
@@ -348,15 +369,15 @@
 
 `SafeKeyboard` 类是实现键盘输入等功能的核心，软键盘的输入、删除、显示、隐藏等等都需要在这里完成，其中最重要的有五个部分
 
-- 1. `SafeKeyboardView` 要设置 `OnKeyboardActionListener` 监听</br></br>
+- 1 . `SafeKeyboardView` 要设置 `OnKeyboardActionListener` 监听</br></br>
 
-- 2. 隐藏系统默认输入法软键盘</br></br>
+- 2 . 隐藏系统默认输入法软键盘</br></br>
 
-- 3. 支持多 `EditText` 共用一个 `SafeKeyboard`</br></br>
+- 3 . 支持多 `EditText` 共用一个 `SafeKeyboard`</br></br>
 
-- 4. `SafeKeyboard` 的显示和隐藏动画
+- 4 . `SafeKeyboard` 的显示和隐藏动画
 
-- 5. 记住每个 `EditText` 上此所显示的键盘类型
+- 5 . 记住每个 `EditText` 上此所显示的键盘类型
 
 #### 2.1 设置 `OnKeyboardActionListener` 监听详细介绍
 
@@ -368,10 +389,10 @@
 
 - <font color=red size=5>注意</font></br>
 正常的输入字符的时候，不能单纯的使用：</br>
-`editable.insert(start, Character.toString((char) primaryCode));`</br>
-<font color=red size=4>要使用: </font></br>
+`editable.insert(start, Character.toString((char) primaryCode));`<br><br>
+  因为这是默认不选中 `EditText` 中文本情况，一旦选中文本就会造成最后的结果和期望的输入结果出现偏差，选中的文本没有被替换，只是纯粹的增加刚刚输入的字符, 所以要获取 `EditText` 中光标的开始和结束位置，并把输入的字符替换掉选中的文本部分. ( 这就是在效果图中有选中文本输入的原因 )
+<font color=red size=4>要使用: </font><br><br>
 `editable.replace(start, end, Character.toString((char) primaryCode));`</br></br>
-因为这是默认不选中 `EditText` 中文本情况，一旦选中文本就会造成最后的结果和期望的输入结果出现偏差，选中的文本没有被替换，只是纯粹的增加刚刚输入的字符，所以要获取 `EditText` 中光标的开始和结束位置，并把输入的字符替换掉选中的文本部分. ( 这就是在效果图中有选中文本输入的原因 )
 
 #### 2.2 隐藏系统默认输入法软键盘
 
@@ -381,9 +402,9 @@
 
 为实现此功能, 需要满足以下两点: 
 
-- 1. 在 `SafeKeyboard` 中增加一个 `HashMap<Integer, EditText>`, 用于保存每个 需要使用 `SafeKeyboard` 的 `EditText` </br></br>
+- 1 . 在 `SafeKeyboard` 中增加一个 `HashMap<Integer, EditText>`, 用于保存每个 需要使用 `SafeKeyboard` 的 `EditText` </br></br>
 
-- 2. 将显示 `SafeKeyboard` 的布局文件根布局 id 传入并保存.  </br>
+- 2 . 将显示 `SafeKeyboard` 的布局文件根布局 id 传入并保存.  </br>
 目的为: 设置全局焦点变化监听, 当焦点在页面中来回切换时决定对 `SafeKeyboard` 进行适当的操作</br>
 详见 变量 `onGlobalFocusChangeListener` 实现
 
@@ -391,9 +412,9 @@
 
 如果我们对于输入法的显示和隐藏没有过多的要求，那么可以直接设置软键盘容器的 `Visibility` 为 `GONE` 或者 `VISIBLE`，但是对于我这种有点强迫症的程序猿来说，能够把自己的项目的效果做的比较合情合理并给用户良好的体验，一直是我个人追求的事情。所以在上面的例子中增加了显示和隐藏动画，显示为从屏幕最下方滑动到固定位置，隐藏为从固定位置滑动到屏幕最下方，于是就多了 `Animation` 的使用。
 
-- 1. 当目标 `EditText` 被点击或者获得焦点的时候，如果 `SafeKeyboard`</br>
-        &nbsp;&nbsp;&nbsp;&nbsp;1 )  `SafeKeyboard` 没有显示, 并且不处于正在显示过程&nbsp;&nbsp;&nbsp;&nbsp;<font color=red size=4>或者: </font></br>
-        &nbsp;&nbsp;&nbsp;&nbsp;2 )  `SafeKeyboard` 正在隐藏</br>
+- 1 . 当目标 `EditText` 被点击或者获得焦点的时候，如果 `SafeKeyboard`<br><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;1 )  `SafeKeyboard` 没有显示, 并且不处于正在显示过程&nbsp;&nbsp;&nbsp;&nbsp;<font color=red size=4>或者: </font><br><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;2 )  `SafeKeyboard` 正在隐藏<br><br>
     那么强制隐藏系统默认键盘，显示 `SafeKeyboard`</br>
     否则, 说明 `SafeKeyboard` 处于显示状态， 这里根据对应的 `EditText` 输入类型切换不同的键盘即可
 
@@ -405,10 +426,10 @@
         private void keyboardPreShow(EditText mEditText)
         ```
 
-- 2. 当目标 `EditText` 失去焦点的时候，如果 `SafeKeyboard`</br>
-        &nbsp;&nbsp;&nbsp;&nbsp;1 )  `SafeKeyboard` 已经显示，并不处于正在隐藏过程&nbsp;&nbsp;&nbsp;&nbsp;<font color=red size=4>或者: </font></br>
-        &nbsp;&nbsp;&nbsp;&nbsp;2 )  `SafeKeyboard` 正在显示</br>
-    那么强制隐藏系统默认键盘，显示 `SafeKeyboard`</br>
+- 2 . 当目标 `EditText` 失去焦点的时候，如果 `SafeKeyboard`<br><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;1 )  `SafeKeyboard` 已经显示，并不处于正在隐藏过程&nbsp;&nbsp;&nbsp;&nbsp;<font color=red size=4>或者: </font><br><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;2 )  `SafeKeyboard` 正在显示<br><br>
+    那么强制隐藏系统默认键盘，显示 `SafeKeyboard`<br><br>
     否则, 说明 `SafeKeyboard` 处于显示状态， 这里根据对应的 `EditText` 输入类型切换不同的键盘即可
 
         ```java
@@ -421,12 +442,8 @@
 #### 2.5 记住每个 `EditText` 上此所显示的键盘类型
 
 记住每个 `EditText` 上此所显示的键盘类型, 并在其重新获得焦点显示 `SafeKeyboard` 时, 显示上次键盘
-
-此功能可在布局文件中
-```xml
-app:remember_last_type="true"
-```
-或者直接调用
+<br><br>
+直接调用
 ```java
 public void enableRememberLastKeyboardType(boolean enable)
 ```
@@ -437,9 +454,7 @@ public void enableRememberLastKeyboardType(boolean enable)
 
 感谢各位开发者的分享，参考项目：
 
-1.&nbsp;&nbsp;&nbsp;&nbsp;https://www.cnblogs.com/liuyu0529/p/7793610.html , 因为本人不善于UI设计，所以键盘布局基本和这个项目区别不大，根据个人喜好作了一些必要的调整
-
-2.&nbsp;&nbsp;&nbsp;&nbsp;https://github.com/StomHong/CustomizeKeyboard
+1.&nbsp;&nbsp;&nbsp;&nbsp;https://github.com/StomHong/CustomizeKeyboard
 
 因为一些项目需要，我在网上查了一些资料，参考已有项目，对开发 `Android` 自定义软键盘重新梳理和编程工作，并且增加和优化一些功能，有需要的开发者可以根据自己的项目需要进行参考或者修改。
 
