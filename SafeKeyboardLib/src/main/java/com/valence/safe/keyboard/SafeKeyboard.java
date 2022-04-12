@@ -134,6 +134,7 @@ public class SafeKeyboard {
     private boolean isShowStart = false;
     private boolean isHideStart = false;
     private boolean forbidPreview = false;  // 关闭按键预览功能
+    private boolean isVibrateEnable = false;
     private int keyboardType = 1;           // SafeKeyboard 键盘类型
     private int mCurrentInputTypeInEdit;    // 当前 EditText 的输入类型, (其实这个参数比较鸡肋, 使用 mCurrentEditText 即可)
     private final Handler safeHandler = new Handler(Looper.getMainLooper());
@@ -193,7 +194,8 @@ public class SafeKeyboard {
      *                               传入目的是：当 EditText 需要被顶起的时候, 顶起该布局, 以达到输入时可以显示已输入内容的功能
      *                               注意, 可以是 EditText 本身, 不过需要传入 View 类型的 EditText
      */
-    public SafeKeyboard(Context mContext, LinearLayout keyboardOuterContainer, @NonNull View rootView, @NonNull View scrollLayout) {
+    public SafeKeyboard(Context mContext, LinearLayout keyboardOuterContainer, @NonNull View rootView,
+                        @NonNull View scrollLayout) {
         this(mContext, keyboardOuterContainer, rootView, scrollLayout, null);
     }
 
@@ -210,8 +212,8 @@ public class SafeKeyboard {
      *                               传入目的是：当 EditText 需要被顶起的时候, 顶起该布局, 以达到输入时可以显示已输入内容的功能
      *                               注意, 可以是 EditText 本身, 不过需要传入 View 类型的 EditText
      */
-    public SafeKeyboard(Context mContext, LinearLayout keyboardOuterContainer, @NonNull View rootView, @NonNull View scrollLayout,
-                        SafeKeyboardConfig keyboardConfig) {
+    public SafeKeyboard(Context mContext, LinearLayout keyboardOuterContainer, @NonNull View rootView,
+                        @NonNull View scrollLayout, SafeKeyboardConfig keyboardConfig) {
         this.mContext = mContext;
         this.keyboardConfig = keyboardConfig == null ? SafeKeyboardConfig.getDefaultConfig() : keyboardConfig;
         // this.keyboardConfig.letterWithNumber = false;   // 暂不支持带数字的字母键盘
@@ -233,6 +235,7 @@ public class SafeKeyboard {
     private void initData() {
         isCapLock = false;
         isCapes = false;
+        isVibrateEnable = false;
         toBackSize = 0;
         downPoint = new ViewPoint();
         upPoint = new ViewPoint();
@@ -259,7 +262,8 @@ public class SafeKeyboard {
     }
 
     private void initKeyboardAndFindView() {
-        keyContainer = LayoutInflater.from(mContext).inflate(keyboardConfig.keyboardContainerLayoutId, keyboardOuterContainer, true);
+        keyContainer = LayoutInflater.from(mContext).inflate(keyboardConfig.keyboardContainerLayoutId,
+                keyboardOuterContainer, true);
         keyboardView = keyContainer.findViewById(keyboardConfig.safeKeyboardViewId);
         keyboardBgImg = keyContainer.findViewById(R.id.keyboardBgImg);
         keyboardImg = keyContainer.findViewById(R.id.keyboardImg);
@@ -332,6 +336,10 @@ public class SafeKeyboard {
         if (rootView != null) {
             treeObserver = rootView.getViewTreeObserver();
             onGlobalFocusChangeListener = (oldFocus, newFocus) -> {
+                if (newFocus instanceof EditText) {
+                    EditText newEdit = (EditText) newFocus;
+                    forceChangeEditImeOptNextToDone(newEdit);
+                }
                 if (oldFocus instanceof EditText) {
                     // 上一个获得焦点的为 EditText
                     EditText oldEdit = (EditText) oldFocus;
@@ -423,6 +431,20 @@ public class SafeKeyboard {
             }
             return false;
         };
+    }
+
+    private void forceChangeEditImeOptNextToDone(EditText newEdit) {
+        // 强制非使用 SafeKeyboard 的 EditText 且下一项、完成、搜索等被设置为 下一项的 设置为完成,
+        // 否则可能会导致点下一项时, SafeKeyboard 和 系统键盘 同时出现
+        Log.w(TAG, "ime: " + newEdit.getImeOptions());
+        if (!mEditMap.containsKey(newEdit.getId())
+                && (newEdit.getImeOptions() == EditorInfo.IME_ACTION_NEXT
+                || newEdit.getImeOptions() == EditorInfo.IME_ACTION_UNSPECIFIED
+                || newEdit.getImeOptions() == EditorInfo.IME_ACTION_NONE)) {
+            newEdit.setImeOptions(EditorInfo.IME_ACTION_DONE);
+            Log.w(TAG, "Id 为: " + newEdit.getId() + " 的 EditText ImeOptions 属性为 IME_ACTION_NEXT-" +
+                    "IME_ACTION_UNSPECIFIED-IME_ACTION_NONE 三者之一, 为避免软键盘显示出错, 现强制设置为 IME_ACTION_DONE--完成");
+        }
     }
 
     private void initAnimation() {
@@ -630,6 +652,10 @@ public class SafeKeyboard {
     }
 
     public void putVibrateEdit(EditText mEditText) {
+        if (isVibrateEnable) {
+            // 只有开启了, 才会震动
+            keyboardView.enableVibrate();
+        }
         putEditText(mEditText);
         if (mVibrateEditIdSet == null) mVibrateEditIdSet = new HashSet<>();
         if (mVibrateEditIdSet.contains(mEditText.getId())) {
@@ -737,7 +763,8 @@ public class SafeKeyboard {
                     // 输入键盘值
                     // editable.insert(start, Character.toString((char) primaryCode));
                     editable.replace(start, end, Character.toString((char) primaryCode));
-                    if (mEditLastKeyboardTypeArray.get(mCurrentEditText.getId(), 1) == 1 && !isCapLock && isCapes) {
+                    if (mEditLastKeyboardTypeArray.get(mCurrentEditText.getId(), 1) == 1
+                            && !isCapLock && isCapes) {
                         // 这是大写未锁定, 大写时输入了一个字母, 键盘自动切换为小写, 这里如果是随机字母键盘时, 不应该再刷新键盘, 所以
                         isJustChangeLetterCase = true;
                         isCapes = isCapLock = false;
@@ -1143,6 +1170,14 @@ public class SafeKeyboard {
         mCurrentInputTypeInEdit = mEditText.getInputType();
     }
 
+    public void setVibrateEnable(boolean vibrateEnable) {
+        isVibrateEnable = vibrateEnable;
+        // 加上下面这个可以规避 putVibrateEdit() 和 setVibrateEnable() 先后调用导致可能无法震动的问题
+        if (mVibrateEditIdSet != null && !mVibrateEditIdSet.isEmpty()) {
+            keyboardView.enableVibrate();
+        }
+    }
+
     public boolean isShow() {
         return isKeyboardShown();
     }
@@ -1211,6 +1246,7 @@ public class SafeKeyboard {
     public void release() {
         mContext = null;
         isCapes = false;
+        isVibrateEnable = false;
         toBackSize = 0;
         lastTouchTime = 0L;
         onEditTextTouchListener = null;

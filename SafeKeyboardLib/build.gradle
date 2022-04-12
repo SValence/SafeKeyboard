@@ -1,16 +1,22 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 30
-
+    compileSdkVersion 31
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
         // 2.0.224.4 2.0 版本, 22年 4月份(22 + 4), 4日
+        versionCode 20
+        versionName "2.0.224.12"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
+
+        buildConfigField 'String', 'VERSION_CODE', '"' + versionCode + '"'
+        buildConfigField 'String', 'DEFAULT_TAG', '"lib_SafeKeyboard"'
+        buildConfigField 'String', 'A_VERSION_NAME_SUFFIX', '"lib_SafeKeyboard_"'
+        buildConfigField 'String', 'VERSION_NAME', 'A_VERSION_NAME_SUFFIX + "' + versionName + '" + "_" + VERSION_CODE'
     }
 
     buildTypes {
@@ -18,22 +24,40 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // signingConfig signingConfigs.release
+            // versionNameSuffix "_xvTimber"
+        }
     }
 
     compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
     }
+
+    android.libraryVariants.all { variant ->
+        variant.outputs.all {
+            output ->
+                def file = output
+                println "rename ${file} to:"
+                outputFileName = "lib_SafeKeyboard_" + android.defaultConfig.versionName + "_" + android.defaultConfig.versionCode +
+                        "-" + buildType.name + ".aar"
+                println outputFileName
+        }
+    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.appcompat:appcompat:1.3.0'
     // implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     // implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 }

@@ -104,8 +104,12 @@ public class SafeKeyboardView extends KeyboardView {
         return enableVibrate;
     }
 
-    public void enableVibrate(boolean enableVibrate) {
-        this.enableVibrate = enableVibrate;
+    public void enableVibrate() {
+        this.enableVibrate = true;
+    }
+
+    public void disableVibrate() {
+        this.enableVibrate = false;
     }
 
     @Override

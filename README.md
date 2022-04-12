@@ -10,6 +10,11 @@ Android自定义安全软键盘，完全自定义，方便、安全、可靠
 
 ## **历史更新**
 
+### 七、 2022/04/12
+* 1 . [修改] 修改 SafeKeyboard 无法按键震动的问题, 并优化震动开启逻辑
+* 2 . [修改] 修改 未使用 SafeKeyboard 的 EditText imeOption 被设置为 "下一项" 时, 点击此按键可能会导致系统软件盘和 SafeKeyboard 软键盘同时显示的 BUG.
+* 3 . [修改] 修改 SafeKeyboard aar 的命名方式, 确定版本号格式
+
 ### 六、 2022/04/11
 * 1 . [新增] 新增 SafeKeyboardConfig 属性, 所有的键盘配置都在这里个对象里定义, 底层所有可在代码层修改的配置均在 SafeKeyboardConfig 中提供配置接口, 详细参考 MainActivity
 * 2 . [修改] 修改 SafeKeyboard 字母随机功能, 修复上个更新无法切换大小写的问题, 并修改大写未锁定时输入一个大写字母后切换为小写字母时又重复刷新字母位置的问题

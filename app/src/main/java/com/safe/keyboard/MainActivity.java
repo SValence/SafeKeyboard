@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         // config.keyboardBgResId = R.drawable.keyboard_arcu_bg;
         // config.iconResIdDel = R.drawable.icon_delete;
         safeKeyboard = new SafeKeyboard(getApplicationContext(), keyboardContainer, rootView, scrollLayout, config);
+        safeKeyboard.setVibrateEnable(true);
         safeKeyboard.putEditText(safeEdit);
         safeKeyboard.putRandomEdit(safeEdit2);
         safeKeyboard.putRandomEdit(safeEdit3);
