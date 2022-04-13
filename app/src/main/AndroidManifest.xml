@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.safe.keyboard">
 
-    <uses-permission android:name="android.permission.VIBRATE" />   <!-- 震动权限 -->
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -13,6 +13,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:theme">
+        <activity
+            android:name=".IncludeSameEditActivity"
+            android:exported="false"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />
         <activity
             android:name=".DialogSafeKeyboardActivity"
             android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />

@@ -22,4 +22,6 @@
     <string name="confirm">确认</string>
     <string name="cancel">取消</string>
     <string name="scroll_view_test">Scroll View Test</string>
+    <string name="include_edit">引入的 EditText</string>
+    <string name="include_same_edit_test">Include Same Edit Test</string>
 </resources>

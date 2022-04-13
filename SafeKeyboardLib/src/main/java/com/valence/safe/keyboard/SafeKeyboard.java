@@ -15,7 +15,6 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -158,12 +157,12 @@ public class SafeKeyboard {
     private SparseArray<Keyboard.Key> randomDigitNumOnlyKeys;
     private SparseArray<Keyboard.Key> randomIdCardDigitKeys;
     private SparseArray<Keyboard.Key> randomLetterKeys;
-    private SparseIntArray mEditLastKeyboardTypeArray;
+    private HashMap<String, Integer> mEditLastKeyboardTypeMap;
 
-    private HashMap<Integer, EditText> mEditMap;
-    private HashMap<Integer, EditText> mIdCardEditMap;
-    private Set<Integer> mRandomEditIdSet;
-    private Set<Integer> mVibrateEditIdSet;
+    private HashMap<String, EditText> mEditMap;
+    private HashMap<String, EditText> mIdCardEditMap;
+    private Set<String> mRandomEditTagSet;
+    private Set<String> mVibrateEditTagSet;
     private View.OnTouchListener onEditTextTouchListener;
     private final View rootView;
     private final View mScrollLayout;
@@ -241,9 +240,9 @@ public class SafeKeyboard {
         upPoint = new ViewPoint();
         mEditMap = new HashMap<>();
         mIdCardEditMap = new HashMap<>();
-        mRandomEditIdSet = new HashSet<>();
-        mVibrateEditIdSet = new HashSet<>();
-        mEditLastKeyboardTypeArray = new SparseIntArray();
+        mRandomEditTagSet = new HashSet<>();
+        mVibrateEditTagSet = new HashSet<>();
+        mEditLastKeyboardTypeMap = new HashMap<>();
         mVibrator = null;
         originalScrollPosInScr = new int[]{0, 0, 0, 0};
         originalScrollPosInPar = new int[]{0, 0, 0, 0};
@@ -343,12 +342,12 @@ public class SafeKeyboard {
                 if (oldFocus instanceof EditText) {
                     // 上一个获得焦点的为 EditText
                     EditText oldEdit = (EditText) oldFocus;
-                    if (mEditMap.get(oldEdit.getId()) != null) {
+                    if (isEditMapContainThisEdit(oldEdit)) {
                         // 前 EditText 使用了 SafeKeyboard
                         // 新获取焦点的是 EditText
                         if (newFocus instanceof EditText) {
                             EditText newEdit = (EditText) newFocus;
-                            if (mEditMap.get(newEdit.getId()) != null) {
+                            if (isEditMapContainThisEdit(newEdit)) {
                                 // 该 EditText 也使用了 SafeKeyboard
                                 // Log.i(TAG, "Safe --> Safe, 开始检查是否需要手动 show");
                                 keyboardPreShow(newEdit);
@@ -371,7 +370,7 @@ public class SafeKeyboard {
                         if (newFocus instanceof EditText) {
                             EditText newEdit = (EditText) newFocus;
                             // 该 EditText 使用了 SafeKeyboard, 则显示
-                            if (mEditMap.get(newEdit.getId()) != null) {
+                            if (isEditMapContainThisEdit(newEdit)) {
                                 // Log.i(TAG, "系统 --> Safe, 开始检查是否需要手动 show");
                                 keyboardPreShow(newEdit);
                             } else {
@@ -389,7 +388,7 @@ public class SafeKeyboard {
                     if (newFocus instanceof EditText) {
                         EditText newEdit = (EditText) newFocus;
                         // 该 EditText 使用了 SafeKeyboard, 则显示
-                        if (mEditMap.get(newEdit.getId()) != null) {
+                        if (isEditMapContainThisEdit(newEdit)) {
                             // Log.i(TAG, "其他 --> Safe, 开始检查是否需要手动 show");
                             keyboardPreShow(newEdit);
                         } else {
@@ -436,14 +435,24 @@ public class SafeKeyboard {
     private void forceChangeEditImeOptNextToDone(EditText newEdit) {
         // 强制非使用 SafeKeyboard 的 EditText 且下一项、完成、搜索等被设置为 下一项的 设置为完成,
         // 否则可能会导致点下一项时, SafeKeyboard 和 系统键盘 同时出现
-        Log.w(TAG, "ime: " + newEdit.getImeOptions());
-        if (!mEditMap.containsKey(newEdit.getId())
+        // Log.w(TAG, "ime: " + newEdit.getImeOptions());
+        if (!isEditMapContainThisEdit(newEdit)
                 && (newEdit.getImeOptions() == EditorInfo.IME_ACTION_NEXT
                 || newEdit.getImeOptions() == EditorInfo.IME_ACTION_UNSPECIFIED
                 || newEdit.getImeOptions() == EditorInfo.IME_ACTION_NONE)) {
             newEdit.setImeOptions(EditorInfo.IME_ACTION_DONE);
-            Log.w(TAG, "Id 为: " + newEdit.getId() + " 的 EditText ImeOptions 属性为 IME_ACTION_NEXT-" +
-                    "IME_ACTION_UNSPECIFIED-IME_ACTION_NONE 三者之一, 为避免软键盘显示出错, 现强制设置为 IME_ACTION_DONE--完成");
+            Object tagObj = newEdit.getTag();
+            if (tagObj != null) {
+                // 其实这里一般不会进入, 除非调用者 主动设置了 tag
+                Log.w(TAG, "Tag 为: " + newEdit.getTag().toString() + " 的 EditText 未使用 SafeKeyboard," +
+                        " ImeOptions 属性为 IME_ACTION_NEXT-IME_ACTION_UNSPECIFIED-IME_ACTION_NONE 三者之一, " +
+                        "为避免软键盘显示出错, 现强制设置为 IME_ACTION_DONE--完成");
+            } else {
+                String msg = "这个 EditText 未使用 SafeKeyboard, 因此未设置 Tag! 此 EditText id 为: " +
+                        newEdit.getId() + ", ImeOptions 属性为 IME_ACTION_NEXT-" +
+                        "IME_ACTION_UNSPECIFIED-IME_ACTION_NONE 三者之一, 为避免软键盘显示出错, 现强制设置为 IME_ACTION_DONE--完成";
+                Log.w(TAG, msg);
+            }
         }
     }
 
@@ -641,14 +650,15 @@ public class SafeKeyboard {
     @SuppressLint("ClickableViewAccessibility")
     public void putEditText(EditText mEditText) {
         if (mEditMap == null) mEditMap = new HashMap<>();
-        mEditMap.put(mEditText.getId(), mEditText);
+        mEditText.setTag(Integer.toHexString(System.identityHashCode(mEditText)));
+        mEditMap.put(mEditText.getTag().toString(), mEditText);
         mEditText.setOnTouchListener(onEditTextTouchListener);
     }
 
-    public void putEditText2IdCardType(int id, EditText mEditText) {
+    public void putEditText2IdCardType(EditText mEditText) {
         putEditText(mEditText);
         if (mIdCardEditMap == null) mIdCardEditMap = new HashMap<>();
-        mIdCardEditMap.put(id, mEditText);
+        mIdCardEditMap.put(mEditText.getTag().toString(), mEditText);
     }
 
     public void putVibrateEdit(EditText mEditText) {
@@ -657,24 +667,24 @@ public class SafeKeyboard {
             keyboardView.enableVibrate();
         }
         putEditText(mEditText);
-        if (mVibrateEditIdSet == null) mVibrateEditIdSet = new HashSet<>();
-        if (mVibrateEditIdSet.contains(mEditText.getId())) {
+        if (mVibrateEditTagSet == null) mVibrateEditTagSet = new HashSet<>();
+        if (mVibrateEditTagSet.contains(mEditText.getTag().toString())) {
             Log.w(TAG, "This edit has been set to vibrate already!!!");
         }
-        mVibrateEditIdSet.add(mEditText.getId());
+        mVibrateEditTagSet.add(mEditText.getTag().toString());
     }
 
     public void putRandomEdit(EditText mEditText) {
         putEditText(mEditText);
-        putRandomEditTextId(mEditText.getId());
+        putRandomEditTextTag(mEditText);
     }
 
-    private void putRandomEditTextId(int id) {
-        if (mRandomEditIdSet == null) mRandomEditIdSet = new HashSet<>();
-        if (mRandomEditIdSet.contains(id)) {
+    private void putRandomEditTextTag(EditText mEditText) {
+        if (mRandomEditTagSet == null) mRandomEditTagSet = new HashSet<>();
+        if (mRandomEditTagSet.contains(mEditText.getTag().toString())) {
             Log.w(TAG, "This edit has been set to random already!!!");
         }
-        mRandomEditIdSet.add(id);
+        mRandomEditTagSet.add(mEditText.getTag().toString());
     }
 
     /**
@@ -691,7 +701,7 @@ public class SafeKeyboard {
     }
 
     // 设置键盘点击监听
-    private KeyboardView.OnKeyboardActionListener listener = new KeyboardView.OnKeyboardActionListener() {
+    private final KeyboardView.OnKeyboardActionListener listener = new KeyboardView.OnKeyboardActionListener() {
 
         @Override
         public void onPress(int primaryCode) {
@@ -763,8 +773,15 @@ public class SafeKeyboard {
                     // 输入键盘值
                     // editable.insert(start, Character.toString((char) primaryCode));
                     editable.replace(start, end, Character.toString((char) primaryCode));
-                    if (mEditLastKeyboardTypeArray.get(mCurrentEditText.getId(), 1) == 1
-                            && !isCapLock && isCapes) {
+
+                    Object tag = mCurrentEditText.getTag();
+                    int type = 1;
+                    if (tag != null) {
+                        Integer integer = mEditLastKeyboardTypeMap.get(tag.toString());
+                        type = integer == null ? 1 : integer;
+                    }
+
+                    if (type == 1 && !isCapLock && isCapes) {
                         // 这是大写未锁定, 大写时输入了一个字母, 键盘自动切换为小写, 这里如果是随机字母键盘时, 不应该再刷新键盘, 所以
                         isJustChangeLetterCase = true;
                         isCapes = isCapLock = false;
@@ -777,7 +794,7 @@ public class SafeKeyboard {
 
                 // 添加按键震动
                 if (keyboardView != null && keyboardView.isVibrateEnable()
-                        && mVibrateEditIdSet.contains(mCurrentEditText.getId())) {
+                        && isVibrateEditSetContainThisEdit(mCurrentEditText)) {
                     if (mVibrator == null) {
                         mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
                     }
@@ -881,8 +898,7 @@ public class SafeKeyboard {
     }
 
     private void switchKeyboard() {
-        boolean isKeyboardRandom = mRandomEditIdSet != null && !mRandomEditIdSet.isEmpty() &&
-                mRandomEditIdSet.contains(mCurrentEditText.getId());
+        boolean isKeyboardRandom = isThisEditKeyboardRandom(mCurrentEditText);
         switch (keyboardType) {
             case 1:
                 if (isKeyboardRandom) {
@@ -940,7 +956,9 @@ public class SafeKeyboard {
         } else if (keyboard == keyboardIdCard || keyboard == keyboardIdCardRandom) {
             type = 5;
         } else type = 1;
-        mEditLastKeyboardTypeArray.put(mCurrentEditText.getId(), type);
+        // Object tagObj = mCurrentEditText.getTag();
+        // 这里 tagObj 不可能等于 null, 如果等于 null 了就说明整个程序出现了问题!
+        mEditLastKeyboardTypeMap.put(mCurrentEditText.getTag().toString(), type);
         keyboardType = type;
         keyboardView.setKeyboard(keyboard);
         // hideSystemKeyBoard(mCurrentEditText);
@@ -971,8 +989,7 @@ public class SafeKeyboard {
     }
 
     private void toLowerCase() {
-        boolean isKeyboardRandom = mRandomEditIdSet != null && !mRandomEditIdSet.isEmpty() &&
-                mRandomEditIdSet.contains(mCurrentEditText.getId());
+        boolean isKeyboardRandom = isThisEditKeyboardRandom(mCurrentEditText);
         Keyboard keyboard = isKeyboardRandom ? keyboardLetterRandom : keyboardLetter;
         List<Keyboard.Key> keyList = keyboard.getKeys();
         for (Keyboard.Key key : keyList) {
@@ -984,8 +1001,7 @@ public class SafeKeyboard {
     }
 
     private void toUpperCase() {
-        boolean isKeyboardRandom = mRandomEditIdSet != null && !mRandomEditIdSet.isEmpty() &&
-                mRandomEditIdSet.contains(mCurrentEditText.getId());
+        boolean isKeyboardRandom = isThisEditKeyboardRandom(mCurrentEditText);
         Keyboard keyboard = isKeyboardRandom ? keyboardLetterRandom : keyboardLetter;
         List<Keyboard.Key> keyList = keyboard.getKeys();
         for (Keyboard.Key key : keyList) {
@@ -1085,8 +1101,7 @@ public class SafeKeyboard {
 
     private void showKeyboard() {
         Keyboard mKeyboard = getKeyboardByInputType();
-        boolean isKeyboardRandom = mRandomEditIdSet != null && !mRandomEditIdSet.isEmpty() &&
-                mRandomEditIdSet.contains(mCurrentEditText.getId());
+        boolean isKeyboardRandom = isThisEditKeyboardRandom(mCurrentEditText);
         if (mKeyboard != null && (mKeyboard == keyboardNumberRandom || mKeyboard == keyboardIdCardRandom
                 || mKeyboard == keyboardNumberOnlyRandom) && isKeyboardRandom) {
             refreshDigitKeyboard(mKeyboard);
@@ -1126,16 +1141,21 @@ public class SafeKeyboard {
     }
 
     private Keyboard getKeyboardByInputType() {
-        boolean isKeyboardRandom = mRandomEditIdSet != null && !mRandomEditIdSet.isEmpty() &&
-                mRandomEditIdSet.contains(mCurrentEditText.getId());
+        boolean isKeyboardRandom = isThisEditKeyboardRandom(mCurrentEditText);
         Keyboard lastKeyboard = isKeyboardRandom ? keyboardLetterRandom : keyboardLetter; // 默认字母键盘
 
         if (mCurrentInputTypeInEdit == InputType.TYPE_CLASS_NUMBER) {
             lastKeyboard = isKeyboardRandom ? keyboardNumberOnlyRandom : keyboardNumberOnly;
-        } else if (mIdCardEditMap.get(mCurrentEditText.getId()) != null) {
+        } else if (isIdCardEditMapContainThisEdit(mCurrentEditText)) {
             lastKeyboard = isKeyboardRandom ? keyboardIdCardRandom : keyboardIdCard;
         } else if (keyboardView.isRememberLastType()) {
-            int type = mEditLastKeyboardTypeArray.get(mCurrentEditText.getId(), 1);
+            Object tag = mCurrentEditText.getTag();
+            // 这里其实不可能是 null
+            int type = 1;
+            if (tag != null) {
+                Integer integer = mEditLastKeyboardTypeMap.get(tag.toString());
+                type = integer == null ? 1 : integer;
+            }
             switch (type) {
                 case 1:
                     lastKeyboard = isKeyboardRandom ? keyboardLetterRandom : keyboardLetter;
@@ -1165,6 +1185,26 @@ public class SafeKeyboard {
         return letters.contains(str);
     }
 
+    private boolean isEditMapContainThisEdit(EditText mEditText) {
+        Object tagObj = mEditText.getTag();
+        return tagObj != null && mEditMap.containsKey(tagObj.toString());
+    }
+
+    private boolean isIdCardEditMapContainThisEdit(EditText mEditText) {
+        Object tagObj = mEditText.getTag();
+        return tagObj != null && mIdCardEditMap.containsKey(tagObj.toString());
+    }
+
+    private boolean isThisEditKeyboardRandom(EditText mEditText) {
+        return mRandomEditTagSet != null && !mRandomEditTagSet.isEmpty() &&
+                mRandomEditTagSet.contains(mEditText.getTag().toString());
+    }
+
+    private boolean isVibrateEditSetContainThisEdit(EditText mEditText) {
+        Object tagObj = mEditText.getTag();
+        return tagObj != null && mVibrateEditTagSet.contains(tagObj.toString());
+    }
+
     private void setCurrentEditText(EditText mEditText) {
         mCurrentEditText = mEditText;
         mCurrentInputTypeInEdit = mEditText.getInputType();
@@ -1173,7 +1213,7 @@ public class SafeKeyboard {
     public void setVibrateEnable(boolean vibrateEnable) {
         isVibrateEnable = vibrateEnable;
         // 加上下面这个可以规避 putVibrateEdit() 和 setVibrateEnable() 先后调用导致可能无法震动的问题
-        if (mVibrateEditIdSet != null && !mVibrateEditIdSet.isEmpty()) {
+        if (mVibrateEditTagSet != null && !mVibrateEditTagSet.isEmpty()) {
             keyboardView.enableVibrate();
         }
     }
@@ -1255,9 +1295,9 @@ public class SafeKeyboard {
         }
         treeObserver = null;
         onGlobalFocusChangeListener = null;
-        if (mEditLastKeyboardTypeArray != null) {
-            mEditLastKeyboardTypeArray.clear();
-            mEditLastKeyboardTypeArray = null;
+        if (mEditLastKeyboardTypeMap != null) {
+            mEditLastKeyboardTypeMap.clear();
+            mEditLastKeyboardTypeMap = null;
         }
         if (mEditMap != null) {
             mEditMap.clear();
@@ -1267,13 +1307,13 @@ public class SafeKeyboard {
             mIdCardEditMap.clear();
             mIdCardEditMap = null;
         }
-        if (mRandomEditIdSet != null) {
-            mRandomEditIdSet.clear();
-            mRandomEditIdSet = null;
+        if (mRandomEditTagSet != null) {
+            mRandomEditTagSet.clear();
+            mRandomEditTagSet = null;
         }
-        if (mVibrateEditIdSet != null) {
-            mVibrateEditIdSet.clear();
-            mVibrateEditIdSet = null;
+        if (mVibrateEditTagSet != null) {
+            mVibrateEditTagSet.clear();
+            mVibrateEditTagSet = null;
         }
         mVibrator = null;
 

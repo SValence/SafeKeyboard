@@ -1,7 +1,7 @@
 # **SafeKeyboard**
 Android自定义安全软键盘，完全自定义，方便、安全、可靠
 
-下一步计划：增加换肤、一键使用、打包发布等功能
+下一步计划：增加换肤、打包发布等功能
 
 详见:  [Android 自定义安全软键盘 SafeKeyboard 开发详细说明 2.0](https://github.com/SValence/SafeKeyboard/wiki/SafeKeyboard-2.0)
 
@@ -10,15 +10,20 @@ Android自定义安全软键盘，完全自定义，方便、安全、可靠
 
 ## **历史更新**
 
+### 八、 2022/04/13
+* 1 . [修改] 修改 `SafeKeyboard` 使用 `EditText.getId()` 作为唯一 `key` 确定 `EditText` 可能会出现系统键盘和 `SafeKeyboard` 同时出现的 `BUG`。
+             即： `include` 多次复用同一个布局文件, 存在某个引入的布局文件没有使用 `SafeKeyboard` 时, 会出现该问题。 见 `issue#23`
+* 2 . [修改] 修改 部分代码冗余问题.
+
 ### 七、 2022/04/12
 * 1 . [修改] 修改 SafeKeyboard 无法按键震动的问题, 并优化震动开启逻辑
-* 2 . [修改] 修改 未使用 SafeKeyboard 的 EditText imeOption 被设置为 "下一项" 时, 点击此按键可能会导致系统软件盘和 SafeKeyboard 软键盘同时显示的 BUG.
-* 3 . [修改] 修改 SafeKeyboard aar 的命名方式, 确定版本号格式
+* 2 . [修改] 修改 未使用 `SafeKeyboard` 的 `EditText imeOption` 被设置为 "下一项" 时, 点击此按键可能会导致系统软件盘和 `SafeKeyboard` 软键盘同时显示的 `BUG`.
+* 3 . [修改] 修改 `SafeKeyboard aar` 的命名方式, 确定版本号格式
 
 ### 六、 2022/04/11
-* 1 . [新增] 新增 SafeKeyboardConfig 属性, 所有的键盘配置都在这里个对象里定义, 底层所有可在代码层修改的配置均在 SafeKeyboardConfig 中提供配置接口, 详细参考 MainActivity
-* 2 . [修改] 修改 SafeKeyboard 字母随机功能, 修复上个更新无法切换大小写的问题, 并修改大写未锁定时输入一个大写字母后切换为小写字母时又重复刷新字母位置的问题
-* 3 . [适配] 适配 SafeKeyboard 可设置每个 EditText 是否开启按键震动
+* 1 . [新增] 新增 `SafeKeyboardConfig` 属性, 所有的键盘配置都在这里个对象里定义, 底层所有可在代码层修改的配置均在 `SafeKeyboardConfig` 中提供配置接口, 详细参考 `MainActivity`
+* 2 . [修改] 修改 `SafeKeyboard` 字母随机功能, 修复上个更新无法切换大小写的问题, 并修改大写未锁定时输入一个大写字母后切换为小写字母时又重复刷新字母位置的问题
+* 3 . [适配] 适配 `SafeKeyboard` 可设置每个 `EditText` 是否开启按键震动
 
 ### 五、 2022/04/08
 * 1 . [修改] 修改 `SafeKeyboard` 为 `Library` (待提供接口以供上层修改必要数据)
@@ -27,7 +32,7 @@ Android自定义安全软键盘，完全自定义，方便、安全、可靠
 
 
 ### 四、 2019/11/17
-* 1 . 修改 `SafeKeyboard` 显示后遮住目标 `EditText` 问题 (被遮挡时顶起目标 `EditText` 父 `View`) 功能实现逻辑, 解决动画效果不尽如人意的 BUG.
+* 1 . 修改 `SafeKeyboard` 显示后遮住目标 `EditText` 问题 (被遮挡时顶起目标 `EditText` 父 `View`) 功能实现逻辑, 解决动画效果不尽如人意的 `BUG`.
 * 2 . 增加按键震动功能(可选)
 
 

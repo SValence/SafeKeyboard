@@ -46,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
         safeKeyboard.putEditText(safeEdit6);
         safeKeyboard.putRandomEdit(safeEdit5);
         safeKeyboard.putEditText(appCompatEditText);
-        safeKeyboard.putEditText2IdCardType(safeEdit3.getId(), safeEdit3);
-        safeKeyboard.setForbidPreview(true);
+        safeKeyboard.putEditText2IdCardType(safeEdit3);
+        // safeKeyboard.setForbidPreview(true);         // 设置是否按键预览
 
         initView();
     }
@@ -84,5 +84,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void onScrollEditTestClick(View view) {
         startActivity(new Intent(MainActivity.this, ScrollViewEditActivity.class));
+    }
+
+    public void onIncludeEditTestClick(View view) {
+        startActivity(new Intent(MainActivity.this, IncludeSameEditActivity.class));
     }
 }

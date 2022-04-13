@@ -7,8 +7,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 31
         // 2.0.224.4 2.0 版本, 22年 4月份(22 + 4), 4日
-        versionCode 20
-        versionName "2.0.224.12"
+        versionCode 21
+        versionName "2.0.224.13"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'

@@ -81,6 +81,14 @@
                 android:onClick="onScrollEditTestClick"
                 android:text="@string/scroll_view_test" />
 
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginStart="10sp"
+                android:layout_marginEnd="10sp"
+                android:onClick="onIncludeEditTestClick"
+                android:text="@string/include_same_edit_test" />
+
             <EditText
                 android:id="@+id/safeEditText4"
                 android:layout_width="match_parent"

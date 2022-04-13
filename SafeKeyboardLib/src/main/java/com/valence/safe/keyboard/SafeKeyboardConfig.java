@@ -4,7 +4,7 @@ import android.widget.ImageView;
 
 public class SafeKeyboardConfig {
 
-    public static int DEFAULT_RES_ID_KEYBOARD_BG = R.drawable.keyboard_bg_default;
+    public static int DEFAULT_RES_ID_KEYBOARD_BG = R.drawable.keyboard_bg_default;      // 也可以是颜色
     public static int DEFAULT_RES_ID_ICON_DEL = R.drawable.icon_del;
     public static int DEFAULT_RES_ID_ICON_LOW_LETTER = R.drawable.icon_capital_default;
     public static int DEFAULT_RES_ID_ICON_UP_LETTER = R.drawable.icon_capital_selected;
