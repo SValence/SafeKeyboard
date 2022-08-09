@@ -1,18 +1,15 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 32
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion 32
         // 2.0.224.4 2.0 版本, 22年 4月份(22 + 4), 4日
-        versionCode 21
-        versionName "2.0.224.13"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
-
         buildConfigField 'String', 'VERSION_CODE', '"' + versionCode + '"'
         buildConfigField 'String', 'DEFAULT_TAG', '"lib_SafeKeyboard"'
         buildConfigField 'String', 'A_VERSION_NAME_SUFFIX', '"lib_SafeKeyboard_"'
@@ -28,8 +25,6 @@ android {
         debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            // signingConfig signingConfigs.release
-            // versionNameSuffix "_xvTimber"
         }
     }
 
@@ -43,20 +38,15 @@ android {
             output ->
                 def file = output
                 println "rename ${file} to:"
-                outputFileName = "lib_SafeKeyboard_" + android.defaultConfig.versionName + "_" + android.defaultConfig.versionCode +
-                        "-" + buildType.name + ".aar"
+                outputFileName = "lib_SafeKeyboard_"+ buildType.name + ".aar"
                 println outputFileName
         }
     }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
-    implementation 'androidx.appcompat:appcompat:1.3.0'
-    // implementation 'com.android.support:appcompat-v7:26.1.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    // implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'

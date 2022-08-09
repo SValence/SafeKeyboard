@@ -15,7 +15,6 @@
         tools:replace="android:theme">
         <activity
             android:name=".IncludeSameEditActivity"
-            android:exported="false"
             android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />
         <activity
             android:name=".DialogSafeKeyboardActivity"
@@ -28,6 +27,7 @@
             android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />
         <activity
             android:name=".MainActivity"
+            android:exported="true"
             android:windowSoftInputMode="stateAlwaysHidden|adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
