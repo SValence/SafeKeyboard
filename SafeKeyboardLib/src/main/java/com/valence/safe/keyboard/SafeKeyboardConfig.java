@@ -4,32 +4,32 @@ import android.widget.ImageView;
 
 public class SafeKeyboardConfig {
 
-    public static int DEFAULT_RES_ID_KEYBOARD_BG = R.drawable.keyboard_bg_default;      // 也可以是颜色
-    public static int DEFAULT_RES_ID_ICON_DEL = R.drawable.icon_del;
-    public static int DEFAULT_RES_ID_ICON_LOW_LETTER = R.drawable.icon_capital_default;
-    public static int DEFAULT_RES_ID_ICON_UP_LETTER = R.drawable.icon_capital_selected;
-    public static int DEFAULT_RES_ID_ICON_UP_LETTER_LOCK = R.drawable.icon_capital_selected_lock;
-    public static int DEFAULT_RES_ID_SPECIAL_KEY_BG = R.drawable.keyboard_change_trans;
-    public static int DEFAULT_LAYOUT_ID_KEYBOARD_CONTAINER = R.layout.layout_keyboard_container;
-    public static int DEFAULT_SAFE_KEYBOARD_VIEW_ID = R.id.safeKeyboardViewId;
-    public static int DEFAULT_KEYBOARD_TITLE_TEXT_COLOR = R.color.white;
-    public static int DEFAULT_KEYBOARD_DONE_IMG_RES_ID = R.drawable.keyboard_done_img;
-    public static int DEFAULT_KEYBOARD_DONE_IMG_LAYOUT_BG_RES_ID = R.drawable.bg_keyboard_done_layout_trans;
+    private static final int DEFAULT_RES_ID_KEYBOARD_BG = R.drawable.keyboard_bg_default;      // 也可以是颜色
+    private static final int DEFAULT_RES_ID_ICON_DEL = R.drawable.icon_del;
+    private static final int DEFAULT_RES_ID_ICON_LOW_LETTER = R.drawable.icon_capital_default;
+    private static final int DEFAULT_RES_ID_ICON_UP_LETTER = R.drawable.icon_capital_selected;
+    private static final int DEFAULT_RES_ID_ICON_UP_LETTER_LOCK = R.drawable.icon_capital_selected_lock;
+    private static final int DEFAULT_RES_ID_SPECIAL_KEY_BG = R.drawable.keyboard_change_trans;
+    private static final int DEFAULT_LAYOUT_ID_KEYBOARD_CONTAINER = R.layout.layout_keyboard_container;
+    private static final int DEFAULT_SAFE_KEYBOARD_VIEW_ID = R.id.safeKeyboardViewId;
+    private static final int DEFAULT_KEYBOARD_TITLE_TEXT_COLOR = R.color.white;
+    private static final int DEFAULT_KEYBOARD_DONE_IMG_RES_ID = R.drawable.keyboard_done_img;
+    private static final int DEFAULT_KEYBOARD_DONE_IMG_LAYOUT_BG_RES_ID = R.drawable.bg_keyboard_done_layout_trans;
 
-    public static ImageView.ScaleType DEFAULT_KEYBOARD_BG_SCALE_TYPE = ImageView.ScaleType.CENTER_CROP;
+    private static final ImageView.ScaleType DEFAULT_KEYBOARD_BG_SCALE_TYPE = ImageView.ScaleType.CENTER_CROP;
 
-    public static boolean DEFAULT_LETTER_WITH_NUMBER = false;
-    public static boolean DEFAULT_ENABLE_VIBRATE = false;
+    private static final boolean DEFAULT_LETTER_WITH_NUMBER = false;
+    private static final boolean DEFAULT_ENABLE_VIBRATE = false;
 
-    public static long DEFAULT_SHOW_TIME = 150;
-    public static long DEFAULT_HIDE_TIME = 150;
-    public static long DEFAULT_DELAY_TIME = 100;
-    public static long DEFAULT_SHOW_DELAY = 100;
-    public static long DEFAULT_HIDE_DELAY = 50;
+    private static final long DEFAULT_SHOW_TIME = 150;
+    private static final long DEFAULT_HIDE_TIME = 150;
+    private static final long DEFAULT_DELAY_TIME = 100;
+    private static final long DEFAULT_SHOW_DELAY = 100;
+    private static final long DEFAULT_HIDE_DELAY = 50;
 
-    public static String DEFAULT_KEYBOARD_TITLE_TEXT = "智能加密安全软键盘";
-    public static String DEFAULT_KEYBOARD_NUM_ONLY_KEY_NONE_TITLE = "SValence";
-    public static int DEFAULT_RES_ID_KEYBOARD_SHIELD_IMG = R.drawable.shield;
+    private static final String DEFAULT_KEYBOARD_TITLE_TEXT = "智能加密安全软键盘";
+    private static final String DEFAULT_KEYBOARD_NUM_ONLY_KEY_NONE_TITLE = "SValence";
+    private static final int DEFAULT_RES_ID_KEYBOARD_SHIELD_IMG = R.drawable.shield;
 
     public ImageView.ScaleType keyboardBgScaleType = DEFAULT_KEYBOARD_BG_SCALE_TYPE;
     public int keyboardBgResId = DEFAULT_RES_ID_KEYBOARD_BG;                        // 键盘背景资源id

@@ -128,8 +128,11 @@ public class SafeKeyboardView extends KeyboardView {
         try {
             List<Keyboard.Key> keys = getKeyboard().getKeys();
             for (Keyboard.Key key : keys) {
-                if (key.codes[0] == -5 || key.codes[0] == -2 || key.codes[0] == 100860 || key.codes[0] == -1)
+                if (key.codes[0] == -5 || key.codes[0] == -2 || key.codes[0] == 100860 || key.codes[0] == -1) {
                     drawSpecialKey(canvas, key);
+                } else {
+                    // TODO ... 增加每个按键背景、字体颜色
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

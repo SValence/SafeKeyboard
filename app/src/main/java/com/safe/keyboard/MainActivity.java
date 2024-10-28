@@ -44,10 +44,13 @@ public class MainActivity extends AppCompatActivity {
         safeKeyboard.putRandomEdit(safeEdit3);
         safeKeyboard.putVibrateEdit(safeEdit4);
         safeKeyboard.putEditText(safeEdit6);
+        // safeKeyboard.putRandomEdit(safeEdit5, false, false);
         safeKeyboard.putRandomEdit(safeEdit5);
         safeKeyboard.putEditText(appCompatEditText);
         safeKeyboard.putEditText2IdCardType(safeEdit3);
-        // safeKeyboard.setForbidPreview(true);         // 设置是否按键预览
+        safeKeyboard.setForbidPreview(true);         // 设置是否按键预览
+        // safeKeyboard.enableRememberLastKeyboardType();
+        // safeKeyboard.enableChangeLetCaseRefreshRandom();
 
         initView();
     }

@@ -10,6 +10,11 @@ Android自定义安全软键盘，完全自定义，方便、安全、可靠
 
 ## **历史更新**
 
+### 九、 2024/10/28
+* 1 . [修改] 修改 `SafeKeyboard` 字母键盘开启随机显示功能后, 切换大小写时字母显示错误等问题。 见 [`issue#30`](https://github.com/SValence/SafeKeyboard/issues/30)
+* 2 . [修改] 修改 部分代码冗余问题.
+* 3 . [展望] 待增加键盘字体颜色配置。 见 [`issue#31`](https://github.com/SValence/SafeKeyboard/issues/31)
+
 ### 八、 2022/04/13
 * 1 . [修改] 修改 `SafeKeyboard` 使用 `EditText.getId()` 作为唯一 `key` 确定 `EditText` 可能会出现系统键盘和 `SafeKeyboard` 同时出现的 `BUG`。
              即： `include` 多次复用同一个布局文件, 存在某个引入的布局文件没有使用 `SafeKeyboard` 时, 会出现该问题。 见 `issue#23`

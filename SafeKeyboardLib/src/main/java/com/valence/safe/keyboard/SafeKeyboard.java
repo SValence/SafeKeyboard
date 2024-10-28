@@ -128,6 +128,7 @@ public class SafeKeyboard {
     private Keyboard keyboardLetter;        //字母键盘总成, keyboardLetterOnly 和 keyboardLetterNum 初始化后, 赋值给此变量
     private Keyboard keyboardLetterRandom;  //随机字母键盘总成, keyboardLetterOnly 和 keyboardLetterNum 初始化后, 赋值给此变量
     private boolean isJustChangeLetterCase = false;
+    private boolean changeLetCaseRefreshRandom = false;
     private static boolean isCapes = false;
     private boolean isCapLock = false;
     private boolean isShowStart = false;
@@ -156,12 +157,20 @@ public class SafeKeyboard {
     private SparseArray<Keyboard.Key> randomDigitKeys;
     private SparseArray<Keyboard.Key> randomDigitNumOnlyKeys;
     private SparseArray<Keyboard.Key> randomIdCardDigitKeys;
+
+    /**
+     * 默认都是小写字符
+     */
     private SparseArray<Keyboard.Key> randomLetterKeys;
     private HashMap<String, Integer> mEditLastKeyboardTypeMap;
 
     private HashMap<String, EditText> mEditMap;
     private HashMap<String, EditText> mIdCardEditMap;
     private Set<String> mRandomEditTagSet;
+    private Set<String> mRandomSwitchSybLetNumRefreshEditTagSet;
+
+    // 字符、字母、数字三个随机键盘切换时, 数字按键始终刷新记录集合
+    private Set<String> mRndNumKbdSwitchAlwaysRefreshEditTagSet;
     private Set<String> mVibrateEditTagSet;
     private View.OnTouchListener onEditTextTouchListener;
     private final View rootView;
@@ -227,8 +236,20 @@ public class SafeKeyboard {
         initAnimation();
     }
 
-    public void enableRememberLastKeyboardType(boolean enable) {
-        keyboardView.setRememberLastType(enable);
+    public void enableRememberLastKeyboardType() {
+        keyboardView.setRememberLastType(true);
+    }
+
+    public void disableRememberLastKeyboardType() {
+        keyboardView.setRememberLastType(false);
+    }
+
+    public void enableChangeLetCaseRefreshRandom() {
+        changeLetCaseRefreshRandom = true;
+    }
+
+    public void disableChangeLetCaseRefreshRandom() {
+        changeLetCaseRefreshRandom = false;
     }
 
     private void initData() {
@@ -241,6 +262,8 @@ public class SafeKeyboard {
         mEditMap = new HashMap<>();
         mIdCardEditMap = new HashMap<>();
         mRandomEditTagSet = new HashSet<>();
+        mRandomSwitchSybLetNumRefreshEditTagSet = new HashSet<>();
+        mRndNumKbdSwitchAlwaysRefreshEditTagSet = new HashSet<>();
         mVibrateEditTagSet = new HashSet<>();
         mEditLastKeyboardTypeMap = new HashMap<>();
         mVibrator = null;
@@ -563,7 +586,8 @@ public class SafeKeyboard {
             new Handler().postDelayed(() -> {
                 // 如果已经显示了, 那么切换键盘即可
                 setCurrentEditText(mEditText);
-                setKeyboard(getKeyboardByInputType());
+                Keyboard keyboard = getKeyboardByInputType();
+                setKeyboardCauseClickOrFocusChanged(keyboard);
             }, delay);
         }
     }
@@ -603,6 +627,9 @@ public class SafeKeyboard {
         refreshDigitKeyboard(keyboardNumberOnlyRandom);
     }
 
+    /**
+     * 中国身份证键盘--随机, 只随机数字按键
+     */
     private void initIdCardRandomDigitKeys() {
         randomIdCardDigitKeys = new SparseArray<>();
         List<Keyboard.Key> keys = keyboardIdCardRandom.getKeys();
@@ -622,7 +649,7 @@ public class SafeKeyboard {
             if (code >= 97 && code <= 122)
                 randomLetterKeys.put(code, key);
         }
-        refreshLowerLetterKeyboard(keyboardLetterRandom);
+        refreshRandomLetterKeyboard(keyboardLetterRandom);
     }
 
     /**
@@ -676,15 +703,43 @@ public class SafeKeyboard {
 
     public void putRandomEdit(EditText mEditText) {
         putEditText(mEditText);
-        putRandomEditTextTag(mEditText);
+        putRandomEditTextTag(mEditText, false, true); // 默认开启数字刷新, 否则一直不刷新
     }
 
-    private void putRandomEditTextTag(EditText mEditText) {
+    public void putRandomEdit(EditText mEditText, boolean switchRefreshLetter, boolean switchRefreshNum) {
+        putEditText(mEditText);
+        putRandomEditTextTag(mEditText, switchRefreshLetter, switchRefreshNum);
+    }
+
+    /**
+     * @param mEditText           要设置的 EditText
+     * @param switchRefreshLetter 默认在同一个 EditText 中切换字符、字母、数字键盘时, 不刷新随机字母、数字的显示位置
+     */
+    private void putRandomEditTextTag(EditText mEditText, boolean switchRefreshLetter, boolean switchRefreshNum) {
         if (mRandomEditTagSet == null) mRandomEditTagSet = new HashSet<>();
         if (mRandomEditTagSet.contains(mEditText.getTag().toString())) {
             Log.w(TAG, "This edit has been set to random already!!!");
         }
         mRandomEditTagSet.add(mEditText.getTag().toString());
+
+        // 设置在同一个 EditText 中切换字符、字母、数字键盘时, 重新设置随机字母的显示位置
+        if (switchRefreshLetter) {
+            if (mRandomSwitchSybLetNumRefreshEditTagSet == null)
+                mRandomSwitchSybLetNumRefreshEditTagSet = new HashSet<>();
+            if (mRandomSwitchSybLetNumRefreshEditTagSet.contains(mEditText.getTag().toString())) {
+                Log.w(TAG, "This edit has been set to random keyboard always refresh already!!!");
+            }
+            mRandomSwitchSybLetNumRefreshEditTagSet.add(mEditText.getTag().toString());
+        }
+        // 设置在同一个 EditText 中切换字符、字母、数字键盘时, 重新设置随机数字的显示位置
+        if (switchRefreshNum) {
+            if (mRndNumKbdSwitchAlwaysRefreshEditTagSet == null)
+                mRndNumKbdSwitchAlwaysRefreshEditTagSet = new HashSet<>();
+            if (mRndNumKbdSwitchAlwaysRefreshEditTagSet.contains(mEditText.getTag().toString())) {
+                Log.w(TAG, "This edit has been set to random keyboard always refresh already!!!");
+            }
+            mRndNumKbdSwitchAlwaysRefreshEditTagSet.add(mEditText.getTag().toString());
+        }
     }
 
     /**
@@ -727,82 +782,32 @@ public class SafeKeyboard {
         @Override
         public void onKey(int primaryCode, int[] keyCodes) {
             try {
-                Editable editable = mCurrentEditText.getText();
-                int start = mCurrentEditText.getSelectionStart();
-                int end = mCurrentEditText.getSelectionEnd();
                 if (primaryCode == Keyboard.KEYCODE_CANCEL) {
                     // 隐藏键盘
                     safeHandler.removeCallbacks(hideRun);
                     safeHandler.removeCallbacks(showRun);
                     safeHandler.post(hideRun/*, HIDE_DELAY*/);
                 } else if (primaryCode == Keyboard.KEYCODE_DELETE || primaryCode == -35) {
-
                     // 回退键,删除字符
-                    if (editable != null && editable.length() > 0) {
-                        if (start == end) { //光标开始和结束位置相同, 即没有选中内容
-                            editable.delete(start - 1, start);
-                        } else { //光标开始和结束位置不同, 即选中EditText中的内容
-                            editable.delete(start, end);
-                        }
-                    }
+                    onKeyboardDeletePressed();
                 } else if (primaryCode == Keyboard.KEYCODE_SHIFT) {
                     // 大小写切换
-                    changeKeyboardLetterCase();
-                    // 重新setKeyboard, 进而系统重新加载, 键盘内容才会变化(切换大小写)
-                    keyboardType = 1;
-                    switchKeyboard();
+                    onKeyboardLetterCaseChangePressed();
                 } else if (primaryCode == Keyboard.KEYCODE_MODE_CHANGE) {
                     // 数字与字母键盘互换
-                    if (keyboardType == 3) { //当前为能切换的数字键盘
-                        keyboardType = 1;
-                    } else {        //当前不是数字键盘, 能切换的数字键盘都是 3
-                        keyboardType = 3;
-                    }
-                    switchKeyboard();
+                    onKeyboardModeChangePressed();
                 } else if (primaryCode == 100860) {
                     // 字母与符号切换
-                    if (keyboardType == 2) { //当前是符号键盘
-                        keyboardType = 1;
-                    } else {        //当前不是符号键盘, 那么切换到符号键盘
-                        keyboardType = 2;
-                    }
-                    switchKeyboard();
+                    onKeyboardSybLetSwitchPressed();
                 } else if (primaryCode == 100861) {
-                    // TODO... 这里啥也不干
+                    // TODO... 这里暂时啥也不干
                 } else {
-                    // 输入键盘值
-                    // editable.insert(start, Character.toString((char) primaryCode));
-                    editable.replace(start, end, Character.toString((char) primaryCode));
-
-                    Object tag = mCurrentEditText.getTag();
-                    int type = 1;
-                    if (tag != null) {
-                        Integer integer = mEditLastKeyboardTypeMap.get(tag.toString());
-                        type = integer == null ? 1 : integer;
-                    }
-
-                    if (type == 1 && !isCapLock && isCapes) {
-                        // 这是大写未锁定, 大写时输入了一个字母, 键盘自动切换为小写, 这里如果是随机字母键盘时, 不应该再刷新键盘, 所以
-                        isJustChangeLetterCase = true;
-                        isCapes = isCapLock = false;
-                        toLowerCase();
-                        keyboardView.setCap(isCapes);
-                        keyboardView.setCapLock(isCapLock);
-                        switchKeyboard();
-                    }
+                    // 用户正常输入
+                    onKeyboardNormalInput(primaryCode);
                 }
 
                 // 添加按键震动
-                if (keyboardView != null && keyboardView.isVibrateEnable()
-                        && isVibrateEditSetContainThisEdit(mCurrentEditText)) {
-                    if (mVibrator == null) {
-                        mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
-                    }
-                    if (mVibrator != null) {
-                        mVibrator.vibrate(20);
-                    }
-                }
-
+                doVibrate();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -810,7 +815,6 @@ public class SafeKeyboard {
 
         @Override
         public void onText(CharSequence text) {
-
         }
 
         @Override
@@ -829,6 +833,103 @@ public class SafeKeyboard {
         public void swipeUp() {
         }
     };
+
+    private void onKeyboardDeletePressed() {
+        // 回退键,删除字符
+        Editable editable = mCurrentEditText.getText();
+        int start = mCurrentEditText.getSelectionStart();
+        int end = mCurrentEditText.getSelectionEnd();
+        if (editable != null && editable.length() > 0) {
+            if (start == end) { //光标开始和结束位置相同, 即没有选中内容
+                editable.delete(start - 1, start);
+            } else { //光标开始和结束位置不同, 即选中EditText中的内容
+                editable.delete(start, end);
+            }
+        }
+    }
+
+    private void onKeyboardLetterCaseChangePressed() {
+        // 大小写切换, 只有字母键盘才有大小写切换功能
+        changeKeyboardLetterCase();
+        // 重新setKeyboard, 进而系统重新加载, 键盘内容才会变化(切换大小写)
+        // keyboardType = 1;
+        if (isCurrentEditTextKeyboardRandom()) {
+            // 随机字母键盘
+            setKeyboard(11, keyboardLetterRandom);
+        } else {
+            // 正常字母键盘
+            setKeyboard(1, keyboardLetter);
+        }
+    }
+
+    private void onKeyboardModeChangePressed() {
+        // 数字与字母键盘互换
+        if (isCurrentEditTextKeyboardRandom()) {
+            if (keyboardType == 33) { //当前为能切换的数字键盘
+                setKeyboard(11, keyboardLetterRandom);
+            } else {        //当前不是数字键盘, 能切换的数字键盘都是 3
+                setKeyboard(33, keyboardNumberRandom);
+            }
+        } else {
+            if (keyboardType == 3) { //当前为能切换的数字键盘
+                setKeyboard(1, keyboardLetter);
+            } else {        //当前不是数字键盘, 能切换的数字键盘都是 3
+                setKeyboard(3, keyboardNumber);
+            }
+        }
+    }
+
+    private void onKeyboardSybLetSwitchPressed() {
+        // 字母与符号切换
+        if (keyboardType == 2) { //当前是符号键盘
+            if (isCurrentEditTextKeyboardRandom()) {
+                setKeyboard(11, keyboardLetterRandom);
+            } else {
+                setKeyboard(1, keyboardLetter);
+            }
+        } else {        //当前不是符号键盘, 那么切换到符号键盘
+            setKeyboard(2, keyboardSymbol);
+        }
+    }
+
+    private void onKeyboardNormalInput(int primaryCode) {
+        // 用户正常输入
+        Editable editable = mCurrentEditText.getText();
+        int start = mCurrentEditText.getSelectionStart();
+        int end = mCurrentEditText.getSelectionEnd();
+        // editable.insert(start, Character.toString((char) primaryCode));
+        editable.replace(start, end, Character.toString((char) primaryCode));
+
+        Object tag = mCurrentEditText.getTag();
+        int type = 1;
+        if (tag != null) {
+            Integer integer = mEditLastKeyboardTypeMap.get(tag.toString());
+            type = integer == null ? 1 : integer;
+        }
+
+        if ((type == 1 || type == 11) && !isCapLock && isCapes) {
+            // 这是大写未锁定, 大写时输入了一个字母, 键盘自动切换为小写, 这里如果是随机字母键盘时, 不应该再刷新键盘, 所以
+            isJustChangeLetterCase = true;
+            isCapes = false;
+            toLowerCase();
+            keyboardView.setCap(isCapes);
+            keyboardView.setCapLock(isCapLock);
+            setKeyboard(type, isCurrentEditTextKeyboardRandom() ? keyboardLetterRandom : keyboardLetter);
+        }
+    }
+
+    private void doVibrate() {
+        // 添加按键震动
+        if (keyboardView != null && keyboardView.isVibrateEnable()
+                && isVibrateEditSetContainThisEdit(mCurrentEditText)) {
+            if (mVibrator == null) {
+                mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+            }
+            if (mVibrator != null) {
+                mVibrator.vibrate(20);
+            }
+        }
+    }
 
     private void refreshDigitKeyboard(Keyboard keyboard) {
         if (keyboard != null) {
@@ -858,22 +959,24 @@ public class SafeKeyboard {
         }
     }
 
-    private void refreshLowerLetterKeyboard(Keyboard keyboard) {
-        if (isJustChangeLetterCase) {
-            // 如果是因为切换大小写运行到这里, 那么就直接返回, 不再随机一次
+    private void refreshRandomLetterKeyboard(Keyboard keyboard) {
+        if (isJustChangeLetterCase && !changeLetCaseRefreshRandom) {
+            // 如果是因为切换大小写运行到这里, 且设置了切换大小写时禁止刷新随机键盘位置, 那么就直接返回, 不再随机一次
+            //     因为当用户在字母键盘中需要切换大小写时, 如果允许往下执行, 会出现点击 "SHIFT" 图标后字母的位置发生变化,
+            //     极易导致客户输入错误, 造成不良体验, 不利于客户输入, 所以在这里进行拦截, 保持切换前后字母位置一致
+            // 支持开启切换大小写时刷新随机键盘位置, 可在外部设置
             isJustChangeLetterCase = false;
-            Log.i(TAG, "Just Change Letter Case!");
+            Log.i(TAG, "Just Change Letter Case! DO NOT REFRESH LETTER POSITION!!!");
             return;
         }
         if (keyboard == keyboardLetterRandom) {
-            SparseArray<Keyboard.Key> randomKeys;
-            randomKeys = randomLetterKeys;
+            SparseArray<Keyboard.Key> randomKeys = randomLetterKeys;
             HashSet<Integer> set = new HashSet<>();
             int aCode = 97;
             while (set.size() < 26) {
                 int num = (int) (Math.random() * 26);
-                if (set.add(num)) {
-                    // set.size() - 1 表示目前是第几个数字按键
+                if (set.add(num)) { // 判断 set.add 是否成功以防随机数重复
+                    // set.size() - 1 + aCode 表示按顺序将 a-z 依次替换为 letterBindArray 中预存的第 num 个字母 (num是本次随机到的数字)
                     Keyboard.Key key = randomKeys.get(set.size() - 1 + aCode);
                     String label = letterBindArray.get(num);
                     if (label == null) {
@@ -889,79 +992,83 @@ public class SafeKeyboard {
                         code = Integer.parseInt(s);
                     }
                     key.label = (isCapLock || isCapes) ? label.toUpperCase() : label;
-                    key.codes[0] = code;
+                    key.codes[0] = (isCapLock || isCapes) ? (code - 32) : code;
                 }
             }
         } else {
-            Log.w(TAG, "Refresh Digit ERROR! Keyboard is null");
-        }
-    }
-
-    private void switchKeyboard() {
-        boolean isKeyboardRandom = isThisEditKeyboardRandom(mCurrentEditText);
-        switch (keyboardType) {
-            case 1:
-                if (isKeyboardRandom) {
-                    refreshLowerLetterKeyboard(keyboardLetterRandom);
-                }
-                setKeyboard(isKeyboardRandom ? keyboardLetterRandom : keyboardLetter);
-                break;
-            case 2:
-                setKeyboard(keyboardSymbol);
-                break;
-            case 3:
-                if (isKeyboardRandom) {
-                    refreshDigitKeyboard(keyboardNumberRandom);
-                }
-                setKeyboard(isKeyboardRandom ? keyboardNumberRandom : keyboardNumber);
-                break;
-            case 4:
-                if (isKeyboardRandom) {
-                    refreshDigitKeyboard(keyboardNumberOnlyRandom);
-                }
-                setKeyboard(isKeyboardRandom ? keyboardNumberOnlyRandom : keyboardNumberOnly);
-                break;
-            case 5:
-                if (isKeyboardRandom) {
-                    refreshDigitKeyboard(keyboardIdCardRandom);
-                }
-                setKeyboard(isKeyboardRandom ? keyboardIdCardRandom : keyboardIdCard);
-                break;
-            default:
-                Log.e(TAG, "ERROR keyboard type");
-                break;
+            Log.e(TAG, "Refresh keyboard ERROR! It is not random letter keyboard!!!");
         }
     }
 
     /**
      * 输入类型分类
-     * 1. 字母键盘
-     * 2. 符号键盘
-     * 3. 数字键盘
-     * 4. 纯数字键盘
-     * 5. 中国身份证键盘
+     * 1.  字母键盘
+     * 11. 字母键盘--随机
+     * 2.  符号键盘
+     * 3.  数字键盘
+     * 33. 数字键盘--随机
+     * 4.  纯数字键盘
+     * 44. 纯数字键盘--随机
+     * 5.  中国身份证键盘
+     * 55. 中国身份证键盘--随机
      *
      * @param keyboard 键盘
      */
-    private void setKeyboard(Keyboard keyboard) {
-        int type;
-        if (keyboard == keyboardLetter || keyboard == keyboardLetterRandom) {
-            type = 1;
-        } else if (keyboard == keyboardSymbol) {
-            type = 2;
-        } else if (keyboard == keyboardNumber || keyboard == keyboardNumberRandom) {
-            type = 3;
-        } else if (keyboard == keyboardNumberOnly || keyboard == keyboardNumberOnlyRandom) {
-            type = 4;
-        } else if (keyboard == keyboardIdCard || keyboard == keyboardIdCardRandom) {
-            type = 5;
-        } else type = 1;
-        // Object tagObj = mCurrentEditText.getTag();
-        // 这里 tagObj 不可能等于 null, 如果等于 null 了就说明整个程序出现了问题!
+    private void setKeyboard(int type, Keyboard keyboard) {
+        switch (type) {
+            case 11:
+                // 字母键盘--随机
+                if (isThisEditRandomKeyboardSwitchSybLetNumRefreshLetter(mCurrentEditText)) {
+                    refreshRandomLetterKeyboard(keyboardLetterRandom);
+                }
+                break;
+            case 33:
+                // 数字键盘--随机
+                if (isThisEditRandomKeyboardSwitchSybLetNumRefreshNum(mCurrentEditText)) {
+                    refreshDigitKeyboard(keyboard);
+                }
+                break;
+            case 44:
+            case 55:
+                // 纯数字键盘--随机, 中国身份证键盘--随机
+                // 上述两个键盘在当前版本中, 不存在与其他键盘相互切换的情况, 所以运行到这里就必然是用户点击了这个 EditText
+                // 那么, 就需要刷新数字所在位置
+                refreshDigitKeyboard(keyboard);
+                break;
+        }
         mEditLastKeyboardTypeMap.put(mCurrentEditText.getTag().toString(), type);
         keyboardType = type;
         keyboardView.setKeyboard(keyboard);
         // hideSystemKeyBoard(mCurrentEditText);
+    }
+
+    /**
+     * 手动点击、或者焦点变化才会触发, 相当于再一次显示, 刷新随机键盘位置
+     *
+     * @param type     type
+     * @param keyboard keyboard
+     */
+    private void setKeyboardRefreshRandom(int type, Keyboard keyboard) {
+        switch (type) {
+            case 11:
+                refreshRandomLetterKeyboard(keyboard);
+                break;
+            case 33:
+            case 44:
+            case 55:
+                // 数字键盘--随机, 纯数字键盘--随机, 中国身份证键盘--随机
+                // 上述三个键盘在当前版本中, 不存在与其他键盘相互切换的情况, 所以运行到这里就必然是用户点击了这个 EditText
+                // 那么, 就需要刷新数字所在位置
+                refreshDigitKeyboard(keyboard);
+                break;
+        }
+        mEditLastKeyboardTypeMap.put(mCurrentEditText.getTag().toString(), type);
+        keyboardType = type;
+        keyboardView.setKeyboard(keyboard);
+    }
+
+    private void setKeyboardCauseClickOrFocusChanged(Keyboard keyboard) {
+        setKeyboardRefreshRandom(keyboardType, keyboard);
     }
 
     private boolean mEditIsNumInput(EditText mCurrentEditText) {
@@ -981,7 +1088,7 @@ public class SafeKeyboard {
             isCapLock = true;
         } else {
             isCapes = true;
-            isCapLock = false;
+            // isCapLock = false; // 本身就是 false, 不要重复赋值
         }
         keyboardView.setCap(isCapes);
         keyboardView.setCapLock(isCapLock);
@@ -989,7 +1096,7 @@ public class SafeKeyboard {
     }
 
     private void toLowerCase() {
-        boolean isKeyboardRandom = isThisEditKeyboardRandom(mCurrentEditText);
+        boolean isKeyboardRandom = isCurrentEditTextKeyboardRandom();
         Keyboard keyboard = isKeyboardRandom ? keyboardLetterRandom : keyboardLetter;
         List<Keyboard.Key> keyList = keyboard.getKeys();
         for (Keyboard.Key key : keyList) {
@@ -1001,7 +1108,7 @@ public class SafeKeyboard {
     }
 
     private void toUpperCase() {
-        boolean isKeyboardRandom = isThisEditKeyboardRandom(mCurrentEditText);
+        boolean isKeyboardRandom = isCurrentEditTextKeyboardRandom();
         Keyboard keyboard = isKeyboardRandom ? keyboardLetterRandom : keyboardLetter;
         List<Keyboard.Key> keyList = keyboard.getKeys();
         for (Keyboard.Key key : keyList) {
@@ -1101,15 +1208,7 @@ public class SafeKeyboard {
 
     private void showKeyboard() {
         Keyboard mKeyboard = getKeyboardByInputType();
-        boolean isKeyboardRandom = isThisEditKeyboardRandom(mCurrentEditText);
-        if (mKeyboard != null && (mKeyboard == keyboardNumberRandom || mKeyboard == keyboardIdCardRandom
-                || mKeyboard == keyboardNumberOnlyRandom) && isKeyboardRandom) {
-            refreshDigitKeyboard(mKeyboard);
-        } else if (mKeyboard != null && mKeyboard == keyboardLetterRandom && isKeyboardRandom) {
-            refreshLowerLetterKeyboard(keyboardLetterRandom);
-        }
-
-        setKeyboard(mKeyboard == null ? keyboardLetter : mKeyboard);
+        setKeyboardCauseClickOrFocusChanged(mKeyboard);
         keyContainer.setVisibility(View.VISIBLE);
         keyContainer.clearAnimation();
         keyContainer.startAnimation(showAnimation);
@@ -1140,38 +1239,73 @@ public class SafeKeyboard {
         }
     }
 
-    private Keyboard getKeyboardByInputType() {
-        boolean isKeyboardRandom = isThisEditKeyboardRandom(mCurrentEditText);
+    /**
+     * 调用这里之前必须确保已经设置了 mCurrentEditText
+     *
+     * @return 返回 Keyboard 对象
+     */
+    private @NonNull Keyboard getKeyboardByInputType() {
+        boolean isKeyboardRandom = isCurrentEditTextKeyboardRandom();
         Keyboard lastKeyboard = isKeyboardRandom ? keyboardLetterRandom : keyboardLetter; // 默认字母键盘
 
-        if (mCurrentInputTypeInEdit == InputType.TYPE_CLASS_NUMBER) {
-            lastKeyboard = isKeyboardRandom ? keyboardNumberOnlyRandom : keyboardNumberOnly;
-        } else if (isIdCardEditMapContainThisEdit(mCurrentEditText)) {
-            lastKeyboard = isKeyboardRandom ? keyboardIdCardRandom : keyboardIdCard;
-        } else if (keyboardView.isRememberLastType()) {
-            Object tag = mCurrentEditText.getTag();
-            // 这里其实不可能是 null
-            int type = 1;
-            if (tag != null) {
-                Integer integer = mEditLastKeyboardTypeMap.get(tag.toString());
-                type = integer == null ? 1 : integer;
+        if (mCurrentInputTypeInEdit == InputType.TYPE_CLASS_NUMBER) {  // 纯数字键盘
+            if (isKeyboardRandom) {
+                keyboardType = 44;
+                lastKeyboard = keyboardNumberOnlyRandom;
+            } else {
+                keyboardType = 4;
+                lastKeyboard = keyboardNumberOnly;
             }
-            switch (type) {
-                case 1:
-                    lastKeyboard = isKeyboardRandom ? keyboardLetterRandom : keyboardLetter;
-                    break;
-                case 2:
-                    lastKeyboard = keyboardSymbol;
-                    break;
-                case 3:
-                    lastKeyboard = isKeyboardRandom ? keyboardNumberRandom : keyboardNumber;
-                    break;
-                default:
-                    Log.e(TAG, "ERROR keyboard type");
-                    break;
+        } else if (isIdCardEditMapContainThisEdit(mCurrentEditText)) { // 身份证键盘
+            if (isKeyboardRandom) {
+                keyboardType = 55;
+                lastKeyboard = keyboardIdCardRandom;
+            } else {
+                keyboardType = 5;
+                lastKeyboard = keyboardIdCard;
+            }
+        } else { // 字母键盘、符号键盘
+            Object tag = mCurrentEditText.getTag();
+            // 这里一般来说不可能是 null, 因为每个 EditText 在 putEditText 时全都已经设置了
+            if (tag == null) {
+                if (isKeyboardRandom) {
+                    keyboardType = 11;
+                    lastKeyboard = keyboardLetterRandom;
+                } else {
+                    keyboardType = 1;
+                    lastKeyboard = keyboardLetter;
+                }
+            } else {
+                // keyboardView.isRememberLastType(): 是否开启记录 EditText 上次输入结束后的键盘类型
+                // 开启后, 当再次点击该 EditText 时, 仍然显示上次的键盘类型
+                // 例如: 默认点击 EditTextA 并输入字母后(或不输入), 切换为字符键盘, 然后直接点击页面中其他 EditTextB,
+                //      而后当再次点击 EditTextA 时, 会直接显示切换时最后输入的字符键盘。
+                //      本功能默认关闭, 需设置打开。
+                Integer integer = keyboardView.isRememberLastType() ? mEditLastKeyboardTypeMap.get(tag.toString()) : null;
+                keyboardType = integer == null ? (isKeyboardRandom ? 11 : 1) : integer;
+                switch (keyboardType) {
+                    case 1:
+                        lastKeyboard = keyboardLetter;
+                        break;
+                    case 11:
+                        lastKeyboard = keyboardLetterRandom;
+                        break;
+                    case 2:
+                        lastKeyboard = keyboardSymbol;
+                        break;
+                    case 3:
+                        lastKeyboard = keyboardNumber;
+                        break;
+                    case 33:
+                        lastKeyboard = keyboardNumberRandom;
+                        break;
+                    default:
+                        Log.e(TAG, "ERROR keyboard type");
+                        break;
+                }
             }
         }
-
+        // 其余的情况不考虑, 均视为普通字母键盘
         return lastKeyboard;
     }
 
@@ -1195,9 +1329,23 @@ public class SafeKeyboard {
         return tagObj != null && mIdCardEditMap.containsKey(tagObj.toString());
     }
 
+    private boolean isCurrentEditTextKeyboardRandom() {
+        return isThisEditKeyboardRandom(mCurrentEditText);
+    }
+
     private boolean isThisEditKeyboardRandom(EditText mEditText) {
         return mRandomEditTagSet != null && !mRandomEditTagSet.isEmpty() &&
                 mRandomEditTagSet.contains(mEditText.getTag().toString());
+    }
+
+    private boolean isThisEditRandomKeyboardSwitchSybLetNumRefreshLetter(EditText mEditText) {
+        return mRandomSwitchSybLetNumRefreshEditTagSet != null && !mRandomSwitchSybLetNumRefreshEditTagSet.isEmpty() &&
+                mRandomSwitchSybLetNumRefreshEditTagSet.contains(mEditText.getTag().toString());
+    }
+
+    private boolean isThisEditRandomKeyboardSwitchSybLetNumRefreshNum(EditText mEditText) {
+        return mRndNumKbdSwitchAlwaysRefreshEditTagSet != null && !mRndNumKbdSwitchAlwaysRefreshEditTagSet.isEmpty() &&
+                mRndNumKbdSwitchAlwaysRefreshEditTagSet.contains(mEditText.getTag().toString());
     }
 
     private boolean isVibrateEditSetContainThisEdit(EditText mEditText) {
@@ -1251,7 +1399,8 @@ public class SafeKeyboard {
             } catch (NoSuchMethodException e) {
                 edit.setInputType(0);
                 e.printStackTrace();
-            } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
+            } catch (IllegalAccessException | InvocationTargetException |
+                     IllegalArgumentException e) {
                 e.printStackTrace();
             }
         }
@@ -1310,6 +1459,14 @@ public class SafeKeyboard {
         if (mRandomEditTagSet != null) {
             mRandomEditTagSet.clear();
             mRandomEditTagSet = null;
+        }
+        if (mRandomSwitchSybLetNumRefreshEditTagSet != null) {
+            mRandomSwitchSybLetNumRefreshEditTagSet.clear();
+            mRandomSwitchSybLetNumRefreshEditTagSet = null;
+        }
+        if (mRndNumKbdSwitchAlwaysRefreshEditTagSet != null) {
+            mRndNumKbdSwitchAlwaysRefreshEditTagSet.clear();
+            mRndNumKbdSwitchAlwaysRefreshEditTagSet = null;
         }
         if (mVibrateEditTagSet != null) {
             mVibrateEditTagSet.clear();
