@@ -10,6 +10,11 @@ Android自定义安全软键盘，完全自定义，方便、安全、可靠
 
 ## **历史更新**
 
+### 十、 2024/11/04
+* 1 . [新增] 新增 `SafeKeyboard` 支持给按键自定义背景和字体颜色见 [`issue#31`](https://github.com/SValence/SafeKeyboard/issues/31)
+* 2 . [新增] 新增 `SafeKeyboard` 取消输入功能, 当用户抬起手指时的位置已不在按下去的按键范围内时, 取消本次输入. 该功能可设置开启关闭, 默认开启.
+* 3 . [修改] 修改 部分代码冗余问题, 重命名部分文件.
+
 ### 九、 2024/10/28
 * 1 . [修改] 修改 `SafeKeyboard` 字母键盘开启随机显示功能后, 切换大小写时字母显示错误等问题。 见 [`issue#30`](https://github.com/SValence/SafeKeyboard/issues/30)
 * 2 . [修改] 修改 部分代码冗余问题.

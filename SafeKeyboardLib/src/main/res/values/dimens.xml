@@ -9,4 +9,6 @@
     <dimen name="dialog_vertical_margin">16dp</dimen>
     <dimen name="dialog_title_size">16sp</dimen>
     <dimen name="dialog_button_text_size">15sp</dimen>
+    <dimen name="key_text_size">20sp</dimen>
+    <dimen name="key_label_size">14sp</dimen>
 </resources>

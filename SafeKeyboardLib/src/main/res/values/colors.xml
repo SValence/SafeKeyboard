@@ -5,6 +5,7 @@
     <color name="colorAccent">#FF4081</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
+    <color name="yellow">#FFE600</color>
     <color name="deepDark">#222222</color>
     <color name="transparent">#00000000</color>
     <color name="keyboardBackColor">#212121</color>
@@ -21,5 +22,6 @@
 
     <color name="keyboardNormalTrans">#8a1c69ac</color>
     <color name="keyboardPressTrans">#aa1296db</color>
+    <color name="keyboardPressTransTestRed">#AADF2313</color>
     <color name="keyboardKeyBackTrans">#aa474749</color>
 </resources>

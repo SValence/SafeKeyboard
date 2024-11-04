@@ -88,7 +88,7 @@ public class SafeKeyboardDialogFragment extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.layout_dialog_fragment, container, false);
+        View view = inflater.inflate(R.layout.layout_dialog_fragment_lib, container, false);
         keyboardContainer = view.findViewById(R.id.safe_keyboard_place);
         rootView = view.findViewById(R.id.dialog_fragment_root);
         mScrollLayout = view.findViewById(R.id.safe_keyboard_dialog_scroll_layout);

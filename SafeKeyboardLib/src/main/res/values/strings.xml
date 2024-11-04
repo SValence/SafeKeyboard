@@ -12,6 +12,7 @@
     <string name="keyboard_demo_new2">安全软键盘(数字)</string>
     <string name="keyboard_demo_new3">安全软键盘(IdCard)</string>
     <string name="mLabelTextSize">mLabelTextSize</string>
+    <string name="mKeyTextSize">mKeyTextSize</string>
     <string name="scrollview_edit_test">ScrollView Edit Test</string>
     <string name="alert_dialog_test">Alert Dialog Test</string>
     <string name="use_safe_alert">AlertDialog使用SafeKeyboard</string>

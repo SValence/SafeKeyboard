@@ -46,7 +46,7 @@
                     android:layout_height="25dp"
                     android:layout_gravity="center_vertical"
                     android:contentDescription="@string/description"
-                    android:src="@drawable/shield" />
+                    android:src="@drawable/shield_lib" />
 
                 <TextView
                     android:id="@+id/keyboardTip"
@@ -64,7 +64,7 @@
                 android:layout_height="match_parent"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:background="@drawable/bg_keyboard_done_layout_trans">
+                android:background="@drawable/bg_keyboard_done_layout_trans_lib">
 
                 <ImageView
                     android:id="@+id/keyboardDoneImg"
@@ -73,7 +73,7 @@
                     android:layout_gravity="center"
                     android:contentDescription="@null"
                     android:scaleType="centerInside"
-                    android:src="@drawable/keyboard_done_img"
+                    android:src="@drawable/keyboard_done_img_lib"
                     android:textColor="@color/white"
                     android:textSize="16sp" />
             </FrameLayout>
@@ -95,11 +95,10 @@
                 android:background="@color/transparent"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:keyBackground="@drawable/keyboard_press_bg_trans"
                 android:keyPreviewHeight="60dp"
-                android:keyPreviewLayout="@layout/keyboard_preview_layout"
+                android:keyPreviewLayout="@layout/keyboard_preview_layout_lib"
                 android:keyPreviewOffset="0dp"
-                android:keyTextColor="@color/white" />
+                android:labelTextSize="@dimen/key_label_size"/>
 
         </FrameLayout>
     </LinearLayout>

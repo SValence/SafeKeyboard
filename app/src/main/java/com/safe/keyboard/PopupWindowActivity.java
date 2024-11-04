@@ -39,14 +39,14 @@ public class PopupWindowActivity extends AppCompatActivity {
                 Toast.makeText(this, R.string.error_param_null_inflater, Toast.LENGTH_SHORT).show();
                 return;
             }
-            View windowView = inflater.inflate(R.layout.layout_single_edit, null, false);
+            View windowView = inflater.inflate(R.layout.layout_single_edit_lib, null, false);
             EditText safeEditPop = windowView.findViewById(R.id.safe_keyboard_sin_edit);
             if (safeKeyboard == null) {
                 LinearLayout keyboardContainer = windowView.findViewById(R.id.safe_keyboard_place);
                 View rootView = windowView.findViewById(R.id.popupEditRoot);
                 safeKeyboard = new SafeKeyboard(getApplicationContext(), keyboardContainer, rootView, safeEditPop);
                 // 默认的预览功能是使用 PopupWindow 实现的, 而 PopupWindow 中不能再弹出 PopupWindow, 所以这里需要关闭预览功能
-                safeKeyboard.setForbidPreview(true);
+                safeKeyboard.setEnablePreview(false);
             }
 
             if (mPopWindow == null) {

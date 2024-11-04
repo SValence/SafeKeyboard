@@ -3,7 +3,7 @@
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:layout_gravity="center"
-    android:background="@drawable/keyboard_preview_bg"
+    android:background="@drawable/keyboard_preview_bg_lib"
     android:gravity="center_horizontal"
     android:textColor="@color/keyboardNormal"
     android:textSize="35sp"
