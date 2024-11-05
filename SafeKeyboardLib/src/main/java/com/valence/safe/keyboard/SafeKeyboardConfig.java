@@ -26,6 +26,7 @@ public class SafeKeyboardConfig {
     private static final boolean DEFAULT_LETTER_WITH_NUMBER = false;
     private static final boolean DEFAULT_ENABLE_VIBRATE = false;
     private static final boolean DEFAULT_ENABLE_CANCEL_INPUT = true;
+    private static final boolean DEFAULT_CHANGE_LETTER_CASE_REFRESH_RANDOM = false;
 
     private static final long DEFAULT_SHOW_TIME = 150;
     private static final long DEFAULT_HIDE_TIME = 150;
@@ -68,7 +69,9 @@ public class SafeKeyboardConfig {
 
     public final boolean letterWithNumber = false; // DEFAULT_LETTER_WITH_NUMBER;                   // 字母键盘是否包含数字
     public boolean enableVibrate = DEFAULT_ENABLE_VIBRATE;                          // 开启按键震动
-    public boolean enableCancelInput =DEFAULT_ENABLE_CANCEL_INPUT;                      // 开启取消输入功能
+    public boolean enableCancelInput = DEFAULT_ENABLE_CANCEL_INPUT;                      // 开启取消输入功能
+    // public boolean changeLetCaseRefreshRandom = DEFAULT_CHANGE_LETTER_CASE_REFRESH_RANDOM; // 切换大小写时, 刷新随机位置
+
 
     public static SafeKeyboardConfig getDefaultConfig() {
         return new SafeKeyboardConfig();

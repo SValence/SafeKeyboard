@@ -21,6 +21,7 @@
                 android:layout_marginStart="10sp"
                 android:layout_marginEnd="10sp"
                 android:hint="@string/keyboard_system"
+                android:imeOptions="actionNext"
                 android:inputType="text" />
 
             <EditText
@@ -111,7 +112,8 @@
                 android:layout_height="50sp"
                 android:layout_marginStart="10sp"
                 android:layout_marginEnd="10sp"
-                android:hint="@string/keyboard_system" />
+                android:hint="@string/keyboard_system"
+                android:inputType="number" />
 
             <EditText
                 android:layout_width="match_parent"
@@ -141,6 +143,7 @@
                 android:layout_marginStart="10sp"
                 android:layout_marginEnd="10sp"
                 android:hint="@string/keyboard_demo_new" />
+
             <EditText
                 android:id="@+id/safeEditText7"
                 android:layout_width="match_parent"

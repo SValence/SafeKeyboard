@@ -10,6 +10,14 @@ Android自定义安全软键盘，完全自定义，方便、安全、可靠
 
 ## **历史更新**
 
+### 十一、 2024/11/05
+* 1 . [修改] 修改 `SafeKeyboard` 字母、数字、符号键盘无法相互切换的 `BUG`.
+* 2 . [修改] 修改 有 `EditText` 未使用 `SafeKeyboard` 且其 `IME_ACTION` 被设置为 `EditorInfo.IME_ACTION_NEXT` (下一项) 的处理逻辑. 允许这样使用.
+* 3 . [修改] 修改 `SafeKeyboard` 各键盘显示、切换的处理逻辑, 相同 `EditText` 中各键盘切换、不同 `EditText` 中各键盘切换, 各自独立处理, 互不干扰.
+* 4 . [修改] 修改 `SafeKeyboard` 显示(指的是由未显示 `->` 显示)逻辑, 焦点变化显示、隐藏后再次点击显示, 各自独立处理, 互不干扰.
+* 5 . [修改] 修改 部分代码冗余问题, 优化部分执行逻辑.
+* 6 . [展望] 待新增加密功能。 见 [`issue#28`](https://github.com/SValence/SafeKeyboard/issues/28)
+
 ### 十、 2024/11/04
 * 1 . [新增] 新增 `SafeKeyboard` 支持给按键自定义背景和字体颜色见 [`issue#31`](https://github.com/SValence/SafeKeyboard/issues/31)
 * 2 . [新增] 新增 `SafeKeyboard` 取消输入功能, 当用户抬起手指时的位置已不在按下去的按键范围内时, 取消本次输入. 该功能可设置开启关闭, 默认开启.

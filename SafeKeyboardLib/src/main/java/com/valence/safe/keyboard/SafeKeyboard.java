@@ -136,13 +136,14 @@ public class SafeKeyboard {
     private boolean enablePreview = false;  // 关闭按键预览功能, 默认关闭按键点击预览功能, 需要时在初始化时开启即可
     private boolean isVibrateEnable = false;
     private int keyboardType = 1;           // SafeKeyboard 键盘类型
-    private int mCurrentInputTypeInEdit;    // 当前 EditText 的输入类型, (其实这个参数比较鸡肋, 使用 mCurrentEditText 即可)
+    // 下面这个不用了, 先注释, 暂不删除
+    // private int mCurrentInputTypeInEdit;    // 当前 EditText 的输入类型, (其实这个参数比较鸡肋, 使用 mCurrentEditText 即可)
     private final Handler safeHandler = new Handler(Looper.getMainLooper());
 
     /**
      * 只起到延时开始显示的作用
      */
-    private final Runnable showRun = this::showKeyboard;
+    private final Runnable showRun = () -> showKeyboard(true);
 
     private final Runnable hideRun = this::hideKeyboard;
 
@@ -171,7 +172,7 @@ public class SafeKeyboard {
     private Set<String> mIdCardEditTagSet;
     private Set<String> mRandomEditTagSet;
     // 字符、字母、数字三个随机键盘切换时, 字母按键始终刷新记录集合
-    private Set<String> mRandomSwitchSybLetNumRefreshEditTagSet;
+    private Set<String> mRandomSybLetKbdSwitchRefreshEditTagSet;
     // 字符、字母、数字三个随机键盘切换时, 数字按键始终刷新记录集合
     private Set<String> mRndNumKbdSwitchAlwaysRefreshEditTagSet;
     private Set<String> mVibrateEditTagSet;
@@ -265,7 +266,7 @@ public class SafeKeyboard {
         mEditTagSet = new HashSet<>();
         mIdCardEditTagSet = new HashSet<>();
         mRandomEditTagSet = new HashSet<>();
-        mRandomSwitchSybLetNumRefreshEditTagSet = new HashSet<>();
+        mRandomSybLetKbdSwitchRefreshEditTagSet = new HashSet<>();
         mRndNumKbdSwitchAlwaysRefreshEditTagSet = new HashSet<>();
         mVibrateEditTagSet = new HashSet<>();
         mEditLastKeyboardTypeMap = new HashMap<>();
@@ -321,6 +322,9 @@ public class SafeKeyboard {
         keyboardLetter = keyboardConfig.letterWithNumber ? keyboardLetterNum : keyboardLetterOnly;
         keyboardLetterRandom = keyboardConfig.letterWithNumber ? keyboardLetterNumRandom : keyboardLetterOnlyRandom;
 
+        // 后面在考虑是否这样用
+        // changeLetCaseRefreshRandom = keyboardConfig.changeLetCaseRefreshRandom;
+
         initNumOnlyKeyboardKeyNoneTitle();
         // 随机键盘
         initRandomDigitKeys();
@@ -365,27 +369,23 @@ public class SafeKeyboard {
             }
         });
 
-        keyboardView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    // Log.w(TAG, "ACTION_MOVE");
-                    return true;
-                } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    // Log.w(TAG, "ACTION_DOWN");
-                } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    // Log.w(TAG, "ACTION_UP");
-                    int mUpX = (int) event.getX();
-                    int mUpY = (int) event.getY();
-                    if (curPressKey != null && !curPressKey.isInside(mUpX, mUpY) && enableCancelInput) {
-                        // Log.e(TAG, "抬起手指的位置位于 Key 之外, key: " + curPressKey.label);
-                        isInputCancel = true;
-                        return false;
-                    }
+        keyboardView.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                // Log.w(TAG, "ACTION_MOVE");
+                return true;
+            } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                // Log.w(TAG, "ACTION_DOWN");
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                // Log.w(TAG, "ACTION_UP");
+                int mUpX = (int) event.getX();
+                int mUpY = (int) event.getY();
+                if (curPressKey != null && !curPressKey.isInside(mUpX, mUpY) && enableCancelInput) {
+                    // Log.e(TAG, "抬起手指的位置位于 Key 之外, key: " + curPressKey.label);
+                    isInputCancel = true;
                 }
-
-                return false;
             }
+
+            return false;
         });
 
         if (rootView != null) {
@@ -393,7 +393,10 @@ public class SafeKeyboard {
             onGlobalFocusChangeListener = (oldFocus, newFocus) -> {
                 if (newFocus instanceof EditText) {
                     EditText newEdit = (EditText) newFocus;
-                    forceChangeEditImeOptNextToDone(newEdit);
+                    if (isEditSetContainThisEdit(newEdit)) {
+                        hideSystemKeyBoard(newEdit);
+                    }
+                    // forceChangeEditImeOptNextToDone(newEdit);
                 }
                 if (oldFocus instanceof EditText) {
                     // 上一个获得焦点的为 EditText
@@ -464,6 +467,11 @@ public class SafeKeyboard {
             // throw new Exception("Root View is null");
         }
 
+        // 这里应该只处理一个事件, 就是:
+        //    当 SafeKeyboard 已经被隐藏了, 再次点击当前 EditText 时, 重新显示.
+        //    其他的显示、切换、点击其他 EditText 等操作应该由别的逻辑处理. 比如: OnGlobalFocusChangeListener 中处理等
+        //    当 SafeKeyboard 从未显示时, 不应该在这里处理, 所以这里要判断 mCurrentEditText 不为空时, 才处理
+        //    其实这里的多个判断逻辑已经基本上规避了 mCurrentEditText 为空的情况, 这里就保留一下
         onEditTextTouchListener = (v, event) -> {
             if (v instanceof EditText) {
                 EditText mEditText = (EditText) v;
@@ -474,10 +482,13 @@ public class SafeKeyboard {
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     upPoint.setCoo_x((int) event.getRawX());
                     upPoint.setCoo_y((int) event.getRawY());
-                    if (isTouchConsiderClick(downPoint, upPoint, mEditText) && mEditText.hasFocus()) {
-                        if (mCurrentEditText == mEditText && isShow()) {
-                            return false;
-                        }
+                    // 这里 mEditText.hasFocus(), 是判断符合 SafeKeyboard 被隐藏后再次点击当前 EditText 条件的关键
+                    // 因为隐藏 SafeKeyboard 后, 一般来说焦点还是在这个 EditText 中的,
+                    // 如果焦点丢失, 再次点击就会触发焦点变化, 那么就属于焦点变化处理逻辑, 而不是在这里处理.
+                    // 所以, 加上 mEditText.hasFocus() 判断点击的是已有焦点的 EditText 且 SafeKeyboard 被隐藏了, 需要重新显示
+                    if (isTouchConsiderClick(downPoint, upPoint, mEditText) && mEditText.hasFocus() && !isShow()
+                            && mCurrentEditText != null && mCurrentEditText == mEditText) {
+                        // 点击了当前 EditText, 且 SafeKeyboard 未显示, 那么重新显示 SafeKeyboard
                         keyboardPreShow(mEditText);
                     }
                     downPoint.clearPoint();
@@ -488,6 +499,8 @@ public class SafeKeyboard {
         };
     }
 
+    // 不用强制改为 完成, 这样会限制客户的其他需求, 应该判断新的 EditText 是否使用了 SafeKeyboard
+    // 使用了的话, 直接隐藏系统软件盘就可以了
     private void forceChangeEditImeOptNextToDone(EditText newEdit) {
         // 强制非使用 SafeKeyboard 的 EditText 且下一项、完成、搜索等被设置为 下一项的 设置为完成,
         // 否则可能会导致点下一项时, SafeKeyboard 和 系统键盘 同时出现
@@ -607,8 +620,7 @@ public class SafeKeyboard {
             new Handler().postDelayed(() -> {
                 // 如果已经显示了, 那么切换键盘即可
                 setCurrentEditText(mEditText);
-                Keyboard keyboard = getCurKeyboardAndConsiderInputType();
-                setKeyboardCauseClickOrFocusChanged(keyboard);
+                showKeyboard(false);
             }, delay);
         }
     }
@@ -738,7 +750,7 @@ public class SafeKeyboard {
 
     /**
      * @param mEditText           要设置的 EditText
-     * @param switchRefreshLetter 默认在同一个 EditText 中切换字符、字母、数字键盘时, 不刷新随机字母、数字的显示位置
+     * @param switchRefreshLetter 切换到期其他输入模式后再切换回字母输入时是否刷新字母显示位置
      * @param switchRefreshNum    切换到期其他输入模式后再切换回数字输入时是否刷新数字显示位置
      */
     private void putRandomEditTextTag(EditText mEditText, boolean switchRefreshLetter, boolean switchRefreshNum) {
@@ -751,12 +763,12 @@ public class SafeKeyboard {
 
         // 设置在同一个 EditText 中切换字符、字母、数字键盘时, 重新设置随机字母的显示位置
         if (switchRefreshLetter) {
-            if (mRandomSwitchSybLetNumRefreshEditTagSet == null)
-                mRandomSwitchSybLetNumRefreshEditTagSet = new HashSet<>();
-            if (mRandomSwitchSybLetNumRefreshEditTagSet.contains(mEditText.getTag().toString())) {
+            if (mRandomSybLetKbdSwitchRefreshEditTagSet == null)
+                mRandomSybLetKbdSwitchRefreshEditTagSet = new HashSet<>();
+            if (mRandomSybLetKbdSwitchRefreshEditTagSet.contains(mEditText.getTag().toString())) {
                 Log.w(TAG, "This edit has been set to random keyboard always refresh already!!!");
             } else {
-                mRandomSwitchSybLetNumRefreshEditTagSet.add(mEditText.getTag().toString());
+                mRandomSybLetKbdSwitchRefreshEditTagSet.add(mEditText.getTag().toString());
             }
         }
         // 设置在同一个 EditText 中切换字符、字母、数字键盘时, 重新设置随机数字的显示位置
@@ -804,7 +816,8 @@ public class SafeKeyboard {
                 keyboardView.setPreviewEnabled(false); // 特殊按键不支持预览
             }
             // Log.e(TAG, "onPress, " + primaryCode);
-            Keyboard keyboard = getCurKeyboardAndConsiderInputType();
+            // 这里只是获取当前, 不对键盘相关参数进行更新
+            Keyboard keyboard = getKeyboardByCurKeyboardType();
             List<Keyboard.Key> keys = keyboard.getKeys();
             if (keys == null) {
                 Log.e(TAG, "Keyboard keys is null!");
@@ -919,10 +932,10 @@ public class SafeKeyboard {
         // keyboardType = 1;
         if (isCurrentEditTextKeyboardRandom()) {
             // 随机字母键盘
-            setKeyboard(11, keyboardLetterRandom);
+            sameEditSwitchKeyboard(11, keyboardLetterRandom);
         } else {
             // 正常字母键盘
-            setKeyboard(1, keyboardLetter);
+            sameEditSwitchKeyboard(1, keyboardLetter);
         }
     }
 
@@ -930,15 +943,15 @@ public class SafeKeyboard {
         // 数字与字母键盘互换
         if (isCurrentEditTextKeyboardRandom()) {
             if (keyboardType == 33) { //当前为能切换的数字键盘
-                setKeyboard(11, keyboardLetterRandom);
+                sameEditSwitchKeyboard(11, keyboardLetterRandom);
             } else {        //当前不是数字键盘, 能切换的数字键盘都是 3
-                setKeyboard(33, keyboardNumberRandom);
+                sameEditSwitchKeyboard(33, keyboardNumberRandom);
             }
         } else {
             if (keyboardType == 3) { //当前为能切换的数字键盘
-                setKeyboard(1, keyboardLetter);
+                sameEditSwitchKeyboard(1, keyboardLetter);
             } else {        //当前不是数字键盘, 能切换的数字键盘都是 3
-                setKeyboard(3, keyboardNumber);
+                sameEditSwitchKeyboard(3, keyboardNumber);
             }
         }
     }
@@ -947,12 +960,12 @@ public class SafeKeyboard {
         // 字母与符号切换
         if (keyboardType == 2) { //当前是符号键盘
             if (isCurrentEditTextKeyboardRandom()) {
-                setKeyboard(11, keyboardLetterRandom);
+                sameEditSwitchKeyboard(11, keyboardLetterRandom);
             } else {
-                setKeyboard(1, keyboardLetter);
+                sameEditSwitchKeyboard(1, keyboardLetter);
             }
         } else {        //当前不是符号键盘, 那么切换到符号键盘
-            setKeyboard(2, keyboardSymbol);
+            sameEditSwitchKeyboard(2, keyboardSymbol);
         }
     }
 
@@ -978,7 +991,9 @@ public class SafeKeyboard {
             toLowerCase();
             keyboardView.setCap(isCapes);
             keyboardView.setCapLock(isCapLock);
-            setKeyboard(type, isCurrentEditTextKeyboardRandom() ? keyboardLetterRandom : keyboardLetter);
+            // 这里其实不用切换键盘, 实际上也是没有切换的, 只是大小写切换, 需要更新一下而已
+            // 和 onKeyboardLetterCaseChangePressed 其实是一个效果
+            sameEditSwitchKeyboard(type, isCurrentEditTextKeyboardRandom() ? keyboardLetterRandom : keyboardLetter);
         }
     }
 
@@ -1065,24 +1080,40 @@ public class SafeKeyboard {
 
     /**
      * 输入类型分类
-     * 1.  字母键盘
-     * 11. 字母键盘--随机
-     * 2.  符号键盘
-     * 3.  数字键盘
-     * 33. 数字键盘--随机
-     * 4.  纯数字键盘
-     * 44. 纯数字键盘--随机
-     * 5.  中国身份证键盘
-     * 55. 中国身份证键盘--随机
+     * <li>1.  字母键盘</li>
+     * <li>11. 字母键盘--随机</li>
+     * <li>2.  符号键盘</li>
+     * <li>3.  数字键盘</li>
+     * <li>33. 数字键盘--随机</li>
+     * <li>4.  纯数字键盘</li>
+     * <li>44. 纯数字键盘--随机</li>
+     * <li>5.  中国身份证键盘</li>
+     * <li>55. 中国身份证键盘--随机</li>
+     * <br>
+     * <p>同一个 EditText 内因点击按键切换键盘类型</p>
+     * <p>只有同一个 EditText 内因点击按键切换键盘时才会调用, 切换键盘需要更新当前键盘类型</p>
      *
+     * @param type     键盘类型, 切换键盘需要更新当前键盘类型
      * @param keyboard 键盘
      */
-    private void setKeyboard(int type, Keyboard keyboard) {
+    private void sameEditSwitchKeyboard(int type, Keyboard keyboard) {
+        doSwitchKeyboard(type, keyboard);
+        // hideSystemKeyBoard(mCurrentEditText);
+    }
+
+    private void doSwitchKeyboard(int type, Keyboard keyboard) {
+        beforeSwitchKeyboardRefreshRandom(type, keyboard);
+        keyboardView.setKeyboard(keyboard, type, mCusKeyBgMap.get(mCurrentEditText.getTag().toString()));
+        keyboardType = type;
+        mEditLastKeyboardTypeMap.put(mCurrentEditText.getTag().toString(), keyboardType);
+    }
+
+    private void beforeSwitchKeyboardRefreshRandom(int type, Keyboard keyboard) {
         switch (type) {
             case 11:
                 // 字母键盘--随机
                 if (isThisEditRandomKeyboardSwitchSybLetNumRefreshLetter(mCurrentEditText)) {
-                    refreshRandomLetterKeyboard(keyboardLetterRandom);
+                    refreshRandomLetterKeyboard(keyboard);
                 }
                 break;
             case 33:
@@ -1093,26 +1124,41 @@ public class SafeKeyboard {
                 break;
             case 44:
             case 55:
+                // 这里感觉其实不会进, 因为目前只支持 字母、数字、符号 键盘相互切换, 纯数字键盘和身份证键盘是不支持切换的
+                // 但是这里保留, 暂不删除
+
                 // 纯数字键盘--随机, 中国身份证键盘--随机
                 // 上述两个键盘在当前版本中, 不存在与其他键盘相互切换的情况, 所以运行到这里就必然是用户点击了这个 EditText
                 // 那么, 就需要刷新数字所在位置
                 refreshDigitKeyboard(keyboard);
                 break;
         }
-        mEditLastKeyboardTypeMap.put(mCurrentEditText.getTag().toString(), type);
-        keyboardType = type;
-        keyboardView.setKeyboard(keyboard, type, mCusKeyBgMap.get(mCurrentEditText.getTag().toString()));
-        // hideSystemKeyBoard(mCurrentEditText);
+    }
+
+    private void showKeyboard(boolean needAnimateOpt) {
+        doShowKeyboard(prepareKeyboardAndConsBeforeShow());
+        if (needAnimateOpt) {
+            keyContainer.setVisibility(View.VISIBLE);
+            keyContainer.clearAnimation();
+            keyContainer.startAnimation(showAnimation);
+        }
+    }
+
+    private void doShowKeyboard(Keyboard keyboard) {
+        beforeShowKeyboardRefreshRandom(keyboard);
+        keyboardView.setKeyboard(keyboard, keyboardType, mCusKeyBgMap.get(mCurrentEditText.getTag().toString()));
+        mEditLastKeyboardTypeMap.put(mCurrentEditText.getTag().toString(), keyboardType);
     }
 
     /**
-     * 手动点击、或者焦点变化才会触发, 相当于再一次显示, 刷新随机键盘位置
+     * <p>手动点击、或者焦点变化才会触发, 相当于再一次显示, 刷新随机键盘位置</p>
+     * <p>不同 EditText 间切换键盘时, 触发此功能</p>
+     * <p>SafeKeyboard 未显示时, 触发此功能</p>
      *
-     * @param type     type
-     * @param keyboard keyboard
+     * @param keyboard 键盘
      */
-    private void setKeyboardRefreshRandom(int type, Keyboard keyboard) {
-        switch (type) {
+    private void beforeShowKeyboardRefreshRandom(Keyboard keyboard) {
+        switch (keyboardType) {
             case 11:
                 refreshRandomLetterKeyboard(keyboard);
                 break;
@@ -1125,24 +1171,15 @@ public class SafeKeyboard {
                 refreshDigitKeyboard(keyboard);
                 break;
         }
-        mEditLastKeyboardTypeMap.put(mCurrentEditText.getTag().toString(), type);
-        keyboardType = type;
-        keyboardView.setKeyboard(keyboard, type, mCusKeyBgMap.get(mCurrentEditText.getTag().toString()));
-    }
-
-    private void setKeyboardCauseClickOrFocusChanged(Keyboard keyboard) {
-        setKeyboardRefreshRandom(keyboardType, keyboard);
-    }
-
-    private boolean mEditIsNumInput(EditText mCurrentEditText) {
-        return mCurrentEditText.getInputType() == EditorInfo.TYPE_CLASS_NUMBER;
     }
 
     private void changeKeyboardLetterCase() {
+        // 默认小写键盘, 点一下改为大写, 不点击其他按键再点击切换大小写则触发锁定大写功能
         if (!isCapes) {
             // 为小写时, 改为大写.
             toUpperCase();
         } else if (isCapLock) {
+            // 当前是大写, 且已经锁定了大写, 那么在点击一次切换大小写, 就需要改成小写键盘.
             toLowerCase();
         }
         if (isCapLock) {
@@ -1269,14 +1306,6 @@ public class SafeKeyboard {
         editNeedScroll(mCurrentEditText);
     }
 
-    private void showKeyboard() {
-        Keyboard mKeyboard = getCurKeyboardAndConsiderInputType();
-        setKeyboardCauseClickOrFocusChanged(mKeyboard);
-        keyContainer.setVisibility(View.VISIBLE);
-        keyContainer.clearAnimation();
-        keyContainer.startAnimation(showAnimation);
-    }
-
     /**
      * @param mEditText 目标 EditText
      */
@@ -1303,41 +1332,46 @@ public class SafeKeyboard {
     }
 
     /**
-     * 调用这里之前必须确保已经设置了 mCurrentEditText
+     * 在显示 SafeKeyboard 之前, 先计算好相关的变量信息, 以及对应的 Keyboard
      *
-     * @return 返回 Keyboard 对象
+     * @return Keyboard 键盘
      */
-    private @NonNull Keyboard getCurKeyboardAndConsiderInputType() {
+    private @NonNull Keyboard prepareKeyboardAndConsBeforeShow() {
         boolean isKeyboardRandom = isCurrentEditTextKeyboardRandom();
-        Keyboard curKeyboard = isKeyboardRandom ? keyboardLetterRandom : keyboardLetter; // 默认字母键盘
+        // 计算相关信息
+        // keyboardType, keyboard
+        Keyboard curKeyboard; // 默认字母键盘
+        int inputType = mCurrentEditText.getInputType(); // 这里 inputType 与 InputType 里面的不是一一对应的, 无法全部判断
+        if (inputType == InputType.TYPE_CLASS_NUMBER || inputType == 18) {
+            // 18 代表数字密码
+            // 纯数字键盘
+            keyboardType = isKeyboardRandom ? 44 : 4;
+            curKeyboard = isKeyboardRandom ? keyboardNumberOnlyRandom : keyboardNumberOnly;
+        } else if (inputType == 4098 || inputType == 8194 || inputType == 3
+                // numberSigned         numberDecimal        phone 就是 InputType.TYPE_CLASS_PHONE
+                || inputType == 20 || inputType == 36 || inputType == 4
+                //  date               time               datetime 就是 TYPE_CLASS_DATETIME
+                || inputType == InputType.TYPE_NUMBER_FLAG_SIGNED || inputType == InputType.TYPE_NUMBER_FLAG_DECIMAL) {
 
-        if (mCurrentInputTypeInEdit == InputType.TYPE_CLASS_NUMBER) {  // 纯数字键盘
-            if (isKeyboardRandom) {
-                keyboardType = 44;
-                curKeyboard = keyboardNumberOnlyRandom;
-            } else {
-                keyboardType = 4;
-                curKeyboard = keyboardNumberOnly;
-            }
-        } else if (isIdCardEditSetContainThisEdit(mCurrentEditText)) { // 身份证键盘
-            if (isKeyboardRandom) {
-                keyboardType = 55;
-                curKeyboard = keyboardIdCardRandom;
-            } else {
-                keyboardType = 5;
-                curKeyboard = keyboardIdCard;
-            }
-        } else { // 字母键盘、符号键盘
+            // 数字键盘, 就是带符号的数字家农安
+            // 这里就是用户可以设置的和数字相关的非纯数字的输入类型, 默认赋值为带符号的数字键盘
+            keyboardType = isKeyboardRandom ? 33 : 3;
+            curKeyboard = isKeyboardRandom ? keyboardNumberRandom : keyboardNumber;
+            // 输入类型的就到这里, 其他的默认为字母键盘(被设置了其他键盘的除外)
+        } else if (isIdCardEditSetContainThisEdit(mCurrentEditText)) {
+            // 身份证键盘
+            keyboardType = isKeyboardRandom ? 55 : 5;
+            curKeyboard = isKeyboardRandom ? keyboardIdCardRandom : keyboardIdCard;
+        } else {
+            // 字母键盘
+            // 其他全部默认字母键盘, 可在字母、数字、符号三者之间切换
+            // 初始化时为字母键盘, 切换为符号时由其他逻辑处理
+
             Object tag = mCurrentEditText.getTag();
             // 这里一般来说不可能是 null, 因为每个 EditText 在 putEditText 时全都已经设置了
             if (tag == null) {
-                if (isKeyboardRandom) {
-                    keyboardType = 11;
-                    curKeyboard = keyboardLetterRandom;
-                } else {
-                    keyboardType = 1;
-                    curKeyboard = keyboardLetter;
-                }
+                keyboardType = isKeyboardRandom ? 11 : 1;
+                curKeyboard = isKeyboardRandom ? keyboardLetterRandom : keyboardLetter;
             } else {
                 // keyboardView.isRememberLastType(): 是否开启记录 EditText 上次输入结束后的键盘类型
                 // 开启后, 当再次点击该 EditText 时, 仍然显示上次的键盘类型
@@ -1346,27 +1380,52 @@ public class SafeKeyboard {
                 //      本功能默认关闭, 需设置打开。
                 Integer integer = keyboardView.isRememberLastType() ? mEditLastKeyboardTypeMap.get(tag.toString()) : null;
                 keyboardType = integer == null ? (isKeyboardRandom ? 11 : 1) : integer;
-                switch (keyboardType) {
-                    case 1:
-                        curKeyboard = keyboardLetter;
-                        break;
-                    case 11:
-                        curKeyboard = keyboardLetterRandom;
-                        break;
-                    case 2:
-                        curKeyboard = keyboardSymbol;
-                        break;
-                    case 3:
-                        curKeyboard = keyboardNumber;
-                        break;
-                    case 33:
-                        curKeyboard = keyboardNumberRandom;
-                        break;
-                    default:
-                        Log.e(TAG, "ERROR keyboard type");
-                        break;
-                }
+                curKeyboard = getKeyboardByCurKeyboardType();
             }
+        }
+        return curKeyboard;
+    }
+
+    /**
+     * 调用这里之前必须确保已经设置了 mCurrentEditText
+     *
+     * @return 返回 Keyboard 对象
+     */
+    private @NonNull Keyboard getKeyboardByCurKeyboardType() {
+        // 默认字母键盘
+        Keyboard curKeyboard;
+        switch (keyboardType) {
+            case 1:
+                curKeyboard = keyboardLetter;
+                break;
+            case 11:
+                curKeyboard = keyboardLetterRandom;
+                break;
+            case 2:
+                curKeyboard = keyboardSymbol;
+                break;
+            case 3:
+                curKeyboard = keyboardNumber;
+                break;
+            case 33:
+                curKeyboard = keyboardNumberRandom;
+                break;
+            case 4:
+                curKeyboard = keyboardIdCard;
+                break;
+            case 44:
+                curKeyboard = keyboardIdCardRandom;
+                break;
+            case 5:
+                curKeyboard = keyboardNumberOnly;
+                break;
+            case 55:
+                curKeyboard = keyboardNumberOnlyRandom;
+                break;
+            default:
+                curKeyboard = isCurrentEditTextKeyboardRandom() ? keyboardLetterRandom : keyboardLetter;
+                Log.e(TAG, "ERROR keyboard type: " + keyboardType + "!!! transfer to default letter keyboard.");
+                break;
         }
         // 其余的情况不考虑, 均视为普通字母键盘
         return curKeyboard;
@@ -1401,7 +1460,7 @@ public class SafeKeyboard {
     }
 
     private boolean isThisEditRandomKeyboardSwitchSybLetNumRefreshLetter(EditText mEditText) {
-        return mRandomSwitchSybLetNumRefreshEditTagSet != null && !mRandomSwitchSybLetNumRefreshEditTagSet.isEmpty() && mRandomSwitchSybLetNumRefreshEditTagSet.contains(mEditText.getTag().toString());
+        return mRandomSybLetKbdSwitchRefreshEditTagSet != null && !mRandomSybLetKbdSwitchRefreshEditTagSet.isEmpty() && mRandomSybLetKbdSwitchRefreshEditTagSet.contains(mEditText.getTag().toString());
     }
 
     private boolean isThisEditRandomKeyboardSwitchSybLetNumRefreshNum(EditText mEditText) {
@@ -1415,7 +1474,6 @@ public class SafeKeyboard {
 
     private void setCurrentEditText(EditText mEditText) {
         mCurrentEditText = mEditText;
-        mCurrentInputTypeInEdit = mEditText.getInputType();
     }
 
     public void setVibrateEnable(boolean vibrateEnable) {
@@ -1436,7 +1494,8 @@ public class SafeKeyboard {
 
     //隐藏系统键盘关键代码
     private void hideSystemKeyBoard(EditText edit) {
-        this.mCurrentEditText = edit;
+        // 这里不应该给 mCurrentEditText 赋值, 先注释掉
+        // this.mCurrentEditText = edit;
         InputMethodManager imm = (InputMethodManager) this.mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm == null) return;
         boolean isOpen = imm.isActive();
@@ -1523,9 +1582,9 @@ public class SafeKeyboard {
             mRandomEditTagSet.clear();
             mRandomEditTagSet = null;
         }
-        if (mRandomSwitchSybLetNumRefreshEditTagSet != null) {
-            mRandomSwitchSybLetNumRefreshEditTagSet.clear();
-            mRandomSwitchSybLetNumRefreshEditTagSet = null;
+        if (mRandomSybLetKbdSwitchRefreshEditTagSet != null) {
+            mRandomSybLetKbdSwitchRefreshEditTagSet.clear();
+            mRandomSybLetKbdSwitchRefreshEditTagSet = null;
         }
         if (mRndNumKbdSwitchAlwaysRefreshEditTagSet != null) {
             mRndNumKbdSwitchAlwaysRefreshEditTagSet.clear();
