@@ -10,6 +10,12 @@ Android自定义安全软键盘，完全自定义，方便、安全、可靠
 
 ## **历史更新**
 
+### 十二、 2024/11/28
+* 1 . [修改] 修改 `SafeKeyboard` 类型返回错误导致无法输入的 `BUG`.
+* 2 . [修改] 修改 部分代码.
+* 3 . [修改] 待支持 `WebView` 中调用, 不过目前没有太好的办法, 因为还没找到 `html` 页面的输入框获得焦点时禁止系统弹出软键盘的方法, 有机会再完善. 见 [`issue#21`](https://github.com/SValence/SafeKeyboard/issues/21)
+* 4 . [展望] 待新增加密功能。 见 [`issue#28`](https://github.com/SValence/SafeKeyboard/issues/28)
+
 ### 十一、 2024/11/05
 * 1 . [修改] 修改 `SafeKeyboard` 字母、数字、符号键盘无法相互切换的 `BUG`.
 * 2 . [修改] 修改 有 `EditText` 未使用 `SafeKeyboard` 且其 `IME_ACTION` 被设置为 `EditorInfo.IME_ACTION_NEXT` (下一项) 的处理逻辑. 允许这样使用.

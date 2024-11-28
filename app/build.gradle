@@ -6,8 +6,8 @@ android {
         applicationId "com.safe.keyboard"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 4
-        versionName "1.23"
+        versionCode 5
+        versionName "1.24"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

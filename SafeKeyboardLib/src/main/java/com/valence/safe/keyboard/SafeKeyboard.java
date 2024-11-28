@@ -6,6 +6,7 @@ import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
 import android.os.Build;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.os.Vibrator;
@@ -24,6 +25,7 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.WebView;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -193,6 +195,8 @@ public class SafeKeyboard {
 
     private Vibrator mVibrator;
 
+    private boolean isWebViewUsage = false;
+
     // 已支持多 EditText 共用一个 SafeKeyboard
 
     /**
@@ -210,6 +214,30 @@ public class SafeKeyboard {
      */
     public SafeKeyboard(Context mContext, LinearLayout keyboardOuterContainer, @NonNull View rootView, @NonNull View scrollLayout) {
         this(mContext, keyboardOuterContainer, rootView, scrollLayout, null);
+    }
+
+    /**
+     * SafeKeyboard 构造方法, 传入必要的参数
+     * <p>仅支持 WebView 中使用时调用</p>
+     * <p>其他时候调用可能会崩溃, 慎用</p>
+     *
+     * @param mContext       上下文 Context
+     * @param keyboardConfig 配置文件
+     */
+    public SafeKeyboard(Context mContext, LinearLayout keyboardOuterContainer, SafeKeyboardConfig keyboardConfig) {
+        this.mContext = mContext;
+        this.keyboardConfig = keyboardConfig == null ? SafeKeyboardConfig.getDefaultConfig() : keyboardConfig;
+        // this.keyboardConfig.letterWithNumber = false;   // 暂不支持带数字的字母键盘
+        this.keyboardOuterContainer = keyboardOuterContainer;
+        this.rootView = null;
+        this.mScrollLayout = null;
+        this.isWebViewUsage = true;
+
+        initData();
+        initKeyboardAndFindView();
+        initKeyboardConfig();
+        setListeners();
+        initAnimation();
     }
 
     /**
@@ -856,6 +884,7 @@ public class SafeKeyboard {
         public void onKey(int primaryCode, int[] keyCodes) {
             if (isInputCancel) {
                 // Log.e(TAG, "取消输入, 抬起手指的位置位于 Key 之外, key: " + curPressKey.label);
+                isInputCancel = false;
                 return;
             }
             try {
@@ -1389,6 +1418,19 @@ public class SafeKeyboard {
     /**
      * 调用这里之前必须确保已经设置了 mCurrentEditText
      *
+     * <p>输入类型分类</p>
+     * <li>1.  字母键盘</li>
+     * <li>11. 字母键盘--随机</li>
+     * <li>2.  符号键盘</li>
+     * <li>3.  数字键盘</li>
+     * <li>33. 数字键盘--随机</li>
+     * <li>4.  纯数字键盘</li>
+     * <li>44. 纯数字键盘--随机</li>
+     * <li>5.  中国身份证键盘</li>
+     * <li>55. 中国身份证键盘--随机</li>
+     * <br>
+     * <p>同一个 EditText 内因点击按键切换键盘类型</p>
+     *
      * @return 返回 Keyboard 对象
      */
     private @NonNull Keyboard getKeyboardByCurKeyboardType() {
@@ -1411,16 +1453,16 @@ public class SafeKeyboard {
                 curKeyboard = keyboardNumberRandom;
                 break;
             case 4:
-                curKeyboard = keyboardIdCard;
-                break;
-            case 44:
-                curKeyboard = keyboardIdCardRandom;
-                break;
-            case 5:
                 curKeyboard = keyboardNumberOnly;
                 break;
-            case 55:
+            case 44:
                 curKeyboard = keyboardNumberOnlyRandom;
+                break;
+            case 5:
+                curKeyboard = keyboardIdCard;
+                break;
+            case 55:
+                curKeyboard = keyboardIdCardRandom;
                 break;
             default:
                 curKeyboard = isCurrentEditTextKeyboardRandom() ? keyboardLetterRandom : keyboardLetter;
@@ -1507,6 +1549,7 @@ public class SafeKeyboard {
         String methodName = null;
         if (currentVersion >= 16) {
             methodName = "setShowSoftInputOnFocus";
+            // edit.setShowSoftInputOnFocus(false);
         } else if (currentVersion >= 14) {
             methodName = "setSoftInputShownOnFocus";
         }

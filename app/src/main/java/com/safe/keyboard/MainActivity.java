@@ -26,13 +26,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        EditText safeEdit = findViewById(R.id.safeEditText);
-        EditText safeEdit2 = findViewById(R.id.safeEditText2);
-        EditText safeEdit3 = findViewById(R.id.safeEditText3);
-        EditText safeEdit4 = findViewById(R.id.safeEditText4);
+        EditText safeEditLetter = findViewById(R.id.safeEditTextLetter1);
+        EditText safeEditTextNum1 = findViewById(R.id.safeEditTextNum1);
+        EditText safeEditTextId1 = findViewById(R.id.safeEditTextId1);
+        EditText safeEditTextInputNum = findViewById(R.id.safeEditTextInputNum);
         EditText safeEdit5 = findViewById(R.id.safe_keyboard_safe_edit);
-        EditText safeEdit6 = findViewById(R.id.safeEditText6);
-        EditText safeEdit7 = findViewById(R.id.safeEditText7);
+        EditText safeEditTextLetter3 = findViewById(R.id.safeEditTextLetter3);
+        EditText safeEditTextId2 = findViewById(R.id.safeEditTextId2);
         AppCompatEditText appCompatEditText = findViewById(R.id.safeAppCompactEditText);
         View rootView = findViewById(R.id.main_root);
         View scrollLayout = findViewById(R.id.scroll_layout);
@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         // SafeKeyboardConfig 用法
         SafeKeyboardConfig config = SafeKeyboardConfig.getDefaultConfig();
         config.keyboardTitle = "SValence智能安全软键盘";
-        config.keyboardNumOnlyKeyNoneTitle = "StandByMe2";
+        config.keyboardNumOnlyKeyNoneTitle = "StandByMe";
         // config.keyboardKeyLabelSize = 20;
         config.keyboardNormalKeyBgResId = R.drawable.keyboard_normal_key_press_bg_trans;
         config.keyboardNormalKeyColorId = R.color.white;
@@ -69,18 +69,18 @@ public class MainActivity extends AppCompatActivity {
         entitySet.setIdCardKeyboardBgResArray(idCardKeyboardBgResArray);
         safeKeyboard = new SafeKeyboard(getApplicationContext(), keyboardContainer, rootView, scrollLayout, config);
         // 设置一个按键背景, 测试一下效果
-        safeKeyboard.putEditText(safeEdit);
+        safeKeyboard.putEditText(safeEditLetter);
         // 设置几个随机键盘
-        safeKeyboard.putRandomEdit(safeEdit2);
+        safeKeyboard.putRandomEdit(safeEditTextNum1);
         // 同时设置随机键盘和身份证键盘
-        safeKeyboard.putRandomEdit(safeEdit3);
-        safeKeyboard.putEditText2IdCardType(safeEdit3);
+        safeKeyboard.putRandomEdit(safeEditTextId1);
+        safeKeyboard.putEditText2IdCardType(safeEditTextId1);
         safeKeyboard.putRandomEdit(safeEdit5);
         // 先允许震动, 才能设置震动成功
         safeKeyboard.setVibrateEnable(true);
-        safeKeyboard.putVibrateEdit(safeEdit4);
-        safeKeyboard.putEditText(safeEdit6);
-        safeKeyboard.putEditText2IdCardType(safeEdit7);
+        safeKeyboard.putVibrateEdit(safeEditTextInputNum);
+        safeKeyboard.putEditText(safeEditTextLetter3);
+        safeKeyboard.putEditText2IdCardType(safeEditTextId2);
         safeKeyboard.putEditText(appCompatEditText);
         safeKeyboard.setEnablePreview(false);         // 设置是否按键预览
         // safeKeyboard.setEnableCancelInput(false);
@@ -88,8 +88,8 @@ public class MainActivity extends AppCompatActivity {
         // safeKeyboard.enableChangeLetCaseRefreshRandom();
 
         // 注意, 一定要在 SafeKeyboard 设置完之后在调用这里
-        safeKeyboard.setEditKeyBgResArray(safeEdit2, entitySet);
-        safeKeyboard.setEditKeyBgResArray(safeEdit3, entitySet);
+        safeKeyboard.setEditKeyBgResArray(safeEditTextNum1, entitySet);
+        safeKeyboard.setEditKeyBgResArray(safeEditTextId1, entitySet);
         safeKeyboard.setEditKeyBgResArray(appCompatEditText, entitySet);
 
         initView();
@@ -131,5 +131,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void onIncludeEditTestClick(View view) {
         startActivity(new Intent(MainActivity.this, IncludeSameEditActivity.class));
+    }
+
+    public void onWebViewUseClick(View view) {
+        // startActivity(new Intent(MainActivity.this, SafeKeyboardWebActivity.class));
     }
 }
